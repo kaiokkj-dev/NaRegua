@@ -28,15 +28,27 @@ app.use(helmet({
   },
   crossOriginEmbedderPolicy: false
 }));
-app.use(cors({
-  origin(origin, callback) {
-    if (!origin || env.allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(Object.assign(new Error('Origem não permitida.'), { status: 403 }));
-  },
-  credentials: true,
+const normalizeOrigin = value => String(value || '').trim().replace(/\/$/, '').toLowerCase();
+const configuredOrigins = env.allowedOrigins.map(normalizeOrigin);
+
+app.use((request, response, next) => {
+  const forwardedProtocol = String(request.headers['x-forwarded-proto'] || '').split(',')[0].trim();
+  const protocol = forwardedProtocol || request.protocol;
+  const currentOrigin = normalizeOrigin(`${protocol}://${request.get('host')}`);
+
+  return cors({
+    origin(origin, callback) {
+      const requestedOrigin = normalizeOrigin(origin);
+      if (!origin || requestedOrigin === currentOrigin || configuredOrigins.includes(requestedOrigin)) {
+        return callback(null, true);
+      }
+      return callback(Object.assign(new Error('Origem não permitida.'), { status: 403 }));
+    },
+    credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+    allowedHeaders: ['Content-Type', 'Authorization']
+  })(request, response, next);
+});
 app.use(express.json({ limit: '32kb' }));
 app.use(express.urlencoded({ extended: false, limit: '32kb' }));
 app.use(cookieParser());
