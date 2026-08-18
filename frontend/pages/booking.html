@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Agendar horário — NaRégua</title><link rel="icon" type="image/png" href="/assets/images/favicon-rounded.png?v=3">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/base.css"><link rel="stylesheet" href="/css/booking.css"><link rel="stylesheet" href="/css/booking-theme.css">
+</head>
+<body class="booking-body">
+  <main class="booking-app">
+    <header class="booking-header"><div class="shop-avatar" data-shop-initial>G</div><div><strong data-shop-name>Carregando...</strong><small>Agendamento online</small></div><button type="button" aria-label="Informações"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg></button></header>
+
+    <section class="catalog-screen" data-catalog-screen>
+      <nav class="catalog-tabs"><button class="active" data-tab="services">Serviços</button><button data-tab="professionals">Profissionais</button></nav>
+      <div data-tab-panel="services"><h1>Serviços disponíveis</h1><div class="service-catalog" data-services></div></div>
+      <div data-tab-panel="professionals" hidden><h1>Escolha um profissional</h1><div class="professional-catalog" data-professionals></div></div>
+    </section>
+
+    <section class="schedule-screen" data-schedule-screen hidden>
+      <div class="schedule-head"><button type="button" data-back>←</button><div><strong>Agendar horário</strong><small>Escolha o melhor momento</small></div><span>Passo 1 de 2</span></div>
+      <div class="selected-service" data-selected-service></div>
+      <section class="schedule-section"><h2>Profissional</h2><div class="professional-picker" data-professional-picker></div></section>
+      <section class="schedule-section"><h2>Selecione um dia</h2><div class="day-picker" data-days></div></section>
+      <section class="schedule-section"><div class="time-title"><h2>Horários disponíveis</h2><span>intervalos de 30 min</span></div><div class="time-groups" data-times></div></section>
+      <button class="continue-button" type="button" data-continue disabled>Selecione um horário</button>
+    </section>
+
+    <section class="details-screen" data-details-screen hidden>
+      <div class="schedule-head"><button type="button" data-details-back>←</button><div><strong>Seus dados</strong><small>Última etapa</small></div><span>Passo 2 de 2</span></div>
+      <div class="booking-review" data-booking-review></div>
+      <div class="booking-extras">
+        <details><summary><svg viewBox="0 0 24 24"><path d="M20 13 12 21 3 12V4h8z"/><circle cx="8" cy="8" r="1"/></svg><span>Tenho um cupom</span><b>⌄</b></summary><div class="coupon-entry"><input data-coupon-code maxlength="24" placeholder="Digite o código"><button type="button" data-apply-coupon>Aplicar</button></div><p data-coupon-message></p></details>
+        <details><summary><svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/><path d="M8 10h8M12 7v6"/></svg><span>Adicionar uma observação</span><b>⌄</b></summary><textarea data-booking-notes maxlength="1000" placeholder="Ex.: Tenho sensibilidade na pele, gostaria de um corte específico..."></textarea></details>
+      </div>
+      <form data-booking-form><label>Como podemos chamar você?<input name="name" required maxlength="100" placeholder="Seu nome"></label><label>WhatsApp com DDD<input name="phone" required maxlength="30" placeholder="(11) 99999-9999"></label><p data-booking-error></p><button type="submit">Confirmar agendamento →</button></form>
+    </section>
+
+    <section class="booking-success" data-booking-success hidden><span>✓</span><h2>Horário confirmado!</h2><p>Seu atendimento já entrou na agenda da barbearia.</p><button type="button" data-book-again>Voltar ao início</button></section>
+    <footer class="booking-nav"><button class="active"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 10 8-6 8 6v9a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z"/></svg><span>Início</span></button><button><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M8 15h3M13 15h3"/></svg><span>Agendamentos</span></button><button><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg><span>Perfil</span></button></footer>
+  </main>
+  <script type="module" src="/js/booking.js"></script>
+</body></html>

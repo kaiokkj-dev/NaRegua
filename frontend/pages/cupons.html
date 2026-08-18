@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cupons — NaRégua</title><link rel="icon" type="image/png" href="/assets/images/favicon-rounded.png?v=3">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/base.css"><link rel="stylesheet" href="/css/dashboard.css"><link rel="stylesheet" href="/css/dashboard-responsive.css"><link rel="stylesheet" href="/css/dashboard-dark.css"><link rel="stylesheet" href="/css/cupons.css">
+</head>
+<body class="dashboard-body">
+  <aside id="dashboard-sidebar"></aside><div class="sidebar-overlay" data-sidebar-close></div>
+  <main class="dashboard-main">
+    <header class="dashboard-header"><button class="mobile-menu" data-sidebar-open>☰</button><div class="search">◇ <span>Campanhas e descontos</span></div><div class="header-actions"><div class="user"><span>NR</span><div><strong>Usuário</strong><small>Administrador</small></div></div></div></header>
+    <div class="dashboard-content coupons-content">
+      <div class="page-title"><div><small>FIDELIZAÇÃO</small><h1>Cupons</h1><p>Crie descontos para atrair e recompensar seus clientes.</p></div><button class="button button-primary" data-new-coupon>＋ Criar cupom</button></div>
+      <section class="coupons-summary"><article><small>CUPONS ATIVOS</small><strong data-active-coupons>0</strong></article><article><small>USOS REALIZADOS</small><strong data-total-uses>0</strong></article></section>
+      <section class="coupons-list" data-coupons-list></section>
+    </div>
+  </main>
+  <dialog class="coupon-dialog" data-coupon-dialog>
+    <form data-coupon-form><input type="hidden" name="id">
+      <div class="coupon-dialog-head"><div><small data-coupon-eyebrow>NOVO CUPOM</small><h2 data-coupon-title>Criar cupom</h2></div><button type="button" data-coupon-close>×</button></div>
+      <label>Código do cupom<input name="code" required minlength="3" maxlength="24" placeholder="Ex.: BEMVINDO20" autocomplete="off"></label>
+      <div class="coupon-fields">
+        <label>Tipo de desconto<select name="discountType"><option value="percent">Porcentagem (%)</option><option value="fixed">Valor fixo (R$)</option></select></label>
+        <label>Valor do desconto<input name="discountValue" type="number" min="1" step="0.01" required value="10"></label>
+      </div>
+      <div class="coupon-fields">
+        <label>Valor mínimo da compra<input name="minimumOrder" type="number" min="0" step="0.01" value="0"></label>
+        <label>Limite de usos <span>(opcional)</span><input name="maxUses" type="number" min="1" placeholder="Sem limite"></label>
+      </div>
+      <div class="coupon-fields validity-fields">
+        <label>Começa em <span>(opcional)</span><input name="startsAt" type="datetime-local"></label>
+        <label>Termina em <span>(opcional)</span><input name="endsAt" type="datetime-local"></label>
+      </div>
+      <p class="coupon-hint">O código será convertido automaticamente para letras maiúsculas.</p><p class="coupon-error" data-coupon-error></p>
+      <div class="coupon-dialog-actions"><button type="button" class="button button-ghost" data-coupon-close>Cancelar</button><button class="button button-primary" type="submit">Salvar cupom</button></div>
+    </form>
+  </dialog>
+  <script type="module" src="/js/cupons.js"></script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+@media (max-width: 560px) {
+  .appointment-dialog,
+  .professional-dialog {
+    width: calc(100% - 24px) !important;
+    max-width: 420px !important;
+    max-height: calc(100dvh - 24px) !important;
+    margin: auto !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-radius: 7px !important;
+  }
+
+  .appointment-dialog form,
+  .professional-dialog form {
+    box-sizing: border-box;
+    max-height: calc(100dvh - 26px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 18px !important;
+    gap: 12px !important;
+  }
+
+  .dialog-head,
+  .professional-dialog-head {
+    align-items: flex-start;
+    margin-bottom: 14px !important;
+  }
+
+  .dialog-head h2,
+  .professional-dialog-head h2 {
+    margin-top: 4px !important;
+    font-size: 23px !important;
+    line-height: 1.08;
+  }
+
+  .dialog-head > button,
+  .professional-dialog-head > button {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px;
+    padding: 0 !important;
+    display: grid;
+    place-items: center;
+    border: 1px solid #3b3d43 !important;
+    border-radius: 4px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 11px !important;
+  }
+
+  .form-grid label { grid-column: 1 / -1; gap: 5px !important; }
+  .form-grid label:nth-last-child(2) { grid-column: 1; }
+  .form-grid label:last-child { grid-column: 2; }
+
+  .form-grid input,
+  .form-grid select,
+  .professional-dialog input {
+    box-sizing: border-box;
+    height: 44px !important;
+    min-height: 44px;
+    font-size: 13px !important;
+  }
+
+  .dialog-error,
+  .professional-dialog form > p {
+    min-height: 0 !important;
+    margin: 2px 0 0 !important;
+  }
+
+  .dialog-actions,
+  .professional-dialog-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1.35fr;
+    gap: 8px !important;
+    margin-top: 2px !important;
+    flex-direction: unset !important;
+  }
+
+  .dialog-actions .button,
+  .professional-dialog-actions .button {
+    width: 100% !important;
+    min-width: 0;
+    height: 45px;
+    padding-inline: 10px;
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .appointment-dialog form,
+  .professional-dialog form { padding: 15px !important; }
+}

@@ -1,0 +1,18 @@
+@media(max-width:520px){
+  .services-summary{padding:12px 2px!important;margin-bottom:7px!important}
+  .services-summary strong{font-size:22px!important}
+  .services-list{gap:0}
+  .service-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto!important;gap:12px 10px;padding:14px 2px!important}
+  .service-name{grid-column:1/-1!important;min-width:0}
+  .service-icon{width:36px;height:36px;flex:0 0 36px}
+  .service-icon .nr-icon{width:17px;height:17px}
+  .service-name>div{min-width:0}
+  .service-name strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px!important}
+  .service-name small{font-size:8px!important}
+  .service-meta{min-width:0;padding:9px 0;border-top:1px solid #25272c}
+  .service-meta strong{font-size:12px!important}
+  .service-meta small{font-size:8px!important}
+  .service-state{align-self:center;margin-top:1px;padding:4px 7px;font-size:8px!important}
+  .service-actions{grid-column:1/-1!important;gap:7px;margin-top:-2px}
+  .service-actions button{height:36px!important;padding:0 10px!important;font-size:9px!important}
+}

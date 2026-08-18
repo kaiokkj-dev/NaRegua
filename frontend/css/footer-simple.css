@@ -1,1 +1,69 @@
 .site-footer .footer-main{grid-template-columns:1.2fr 1fr auto;align-items:center;gap:60px;padding:45px 0}.site-footer .footer-brand>p{margin:12px 0 0}.footer-links{display:flex!important;align-items:center!important;flex-direction:row!important;flex-wrap:wrap;gap:10px 25px!important}.footer-contact{padding-left:22px;border-left:1px solid #303136}.footer-contact small,.footer-contact strong{display:block}.footer-contact small{margin-bottom:6px;color:#66676c;font-size:7px;letter-spacing:1.2px}.footer-contact strong{font-size:10px}.site-footer .footer-bottom{grid-template-columns:1fr auto}.site-footer .socials{display:none}@media(max-width:760px){.site-footer .footer-main{grid-template-columns:1fr;gap:28px}.footer-contact{padding:0;border:0}.site-footer .footer-bottom{display:flex;align-items:flex-start;flex-direction:column;gap:13px}}@media(max-width:500px){.site-footer .footer-main{padding:38px 0}.footer-links{gap:10px 18px!important}.site-footer .footer-bottom{padding-bottom:24px}}
+
+@media (max-width: 500px) {
+  .site-footer .container {
+    width: min(100% - 32px, 1160px);
+  }
+
+  .site-footer .footer-main {
+    gap: 20px;
+    padding: 28px 0 22px;
+  }
+
+  .site-footer .footer-brand .brand {
+    gap: 11px;
+    font-size: 22px;
+    letter-spacing: -.7px;
+  }
+
+  .site-footer .footer-brand .brand img {
+    width: 46px;
+    height: 46px;
+  }
+
+  .site-footer .footer-brand > p {
+    margin-top: 12px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .site-footer .footer-links {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 13px 18px !important;
+    width: 100%;
+    padding: 18px 0;
+    border-top: 1px solid #292a2e;
+    border-bottom: 1px solid #292a2e;
+  }
+
+  .site-footer .footer-links a {
+    font-size: 12px;
+    color: #b5b6ba;
+  }
+
+  .site-footer .footer-contact {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .site-footer .footer-contact small {
+    margin-bottom: 8px;
+    font-size: 8px;
+  }
+
+  .site-footer .footer-contact strong {
+    font-size: 12px;
+  }
+
+  .site-footer .footer-bottom {
+    gap: 11px;
+    padding: 17px 0 20px;
+    font-size: 9px;
+  }
+
+  .site-footer .legal {
+    gap: 22px;
+    font-size: 9px;
+  }
+}

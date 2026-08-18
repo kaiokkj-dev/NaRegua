@@ -4,3 +4,43 @@
 .dashboard-grid > *,
 .panel { min-width: 0; }
 
+.appointment-dialog{width:min(620px,calc(100% - 28px));padding:0;border:1px solid #33353a;border-radius:10px;background:#17181b;color:#eee;box-shadow:0 28px 80px rgba(0,0,0,.55)}.appointment-dialog::backdrop{background:rgba(5,6,7,.75);backdrop-filter:blur(3px)}.appointment-dialog form{padding:24px}.dialog-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px}.dialog-head small{color:#c49a00;font-size:8px;letter-spacing:1.4px}.dialog-head h2{margin:6px 0 0;font:700 22px var(--display)}.dialog-head>button{border:0;background:none;color:#999;font-size:26px;cursor:pointer}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.form-grid label{display:grid;gap:7px;color:#aaa;font-size:9px}.form-grid input{width:100%;height:44px;padding:0 12px;border:1px solid #34363b;border-radius:5px;outline:0;background:#222328;color:#fff}.form-grid input:focus{border-color:var(--yellow)}.dialog-error{min-height:18px;margin:12px 0 0;color:#e37d76;font-size:10px}.dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:10px}.dialog-actions .button-ghost{border-color:#3b3c40;background:transparent}.empty-row td{text-align:center;padding:42px 15px;color:#999}.appointment-dialog[open]{animation:dialog-in .2s ease}@keyframes dialog-in{from{opacity:0;transform:translateY(10px) scale(.98)}}
+@media(max-width:560px){.appointment-dialog form{padding:20px}.form-grid{grid-template-columns:1fr}.dialog-actions{flex-direction:column-reverse}.dialog-actions .button{width:100%}}
+
+/* Ritmo vertical consistente em todas as telas do painel. */
+@media(max-width:800px){
+  .dashboard-header{height:56px!important;padding:0 14px!important}
+  .dashboard-content{width:100%;padding:14px 14px 28px!important}
+  .page-title{align-items:flex-start!important;gap:12px;margin-bottom:14px!important}
+  .page-title small{font-size:8px!important}
+  .page-title h1{margin:3px 0!important;font-size:27px!important;line-height:1.12}
+  .page-title p{font-size:12px!important;line-height:1.45}
+  .page-title .button{flex:0 0 42px;min-height:42px!important;margin:0!important;padding:0!important}
+  .stats-grid,.dashboard-grid{margin-top:10px!important}
+  .panel-head{margin-bottom:13px!important;padding-bottom:11px!important}
+  .agenda-toolbar,.clients-summary,.services-summary,.professionals-summary,.coupons-summary{margin-top:0!important;margin-bottom:12px!important}
+  .agenda-panel{padding-top:14px!important}
+  .services-empty,.professionals-empty,.clients-empty,.coupons-empty{padding-block:38px!important}
+  dialog[open]{max-height:calc(100dvh - 20px);margin:auto;overflow:auto}
+}
+@media(max-width:560px){
+  .dashboard-content{padding:11px 12px 24px!important}
+  .page-title{margin-bottom:11px!important}
+  .page-title>div{min-width:0;flex:1}
+  .page-title h1{font-size:25px!important}
+  .page-title .button{width:42px!important;max-width:42px;overflow:hidden;font-size:0!important;white-space:nowrap}
+  .page-title .button .nr-icon{width:18px;height:18px;margin:0}
+  .stats-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0!important;margin-top:8px!important}
+  .stats-grid article,.stats-grid article.next-card{min-width:0;min-height:132px!important;padding:13px!important}
+  .stats-grid article:nth-child(odd){border-right:1px solid var(--dash-line)!important}
+  .stats-grid article:nth-child(-n+2){border-bottom:1px solid var(--dash-line)!important}
+  .stat-head{margin-bottom:10px!important}
+  .stats-grid article>strong{margin:3px 0!important;font-size:28px!important}
+  .stats-grid article>p{line-height:1.35}
+  .panel{padding:12px!important}
+  .agenda-toolbar{padding:11px!important}
+  .agenda-item,.client-row,.service-row,.professional-row{padding-block:12px!important}
+  .coupons-summary article{padding:13px!important}
+  .coupon-card{min-height:185px!important;padding:17px!important}
+  .coupon-discount{margin-top:17px!important}
+}

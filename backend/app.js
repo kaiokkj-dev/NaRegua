@@ -34,7 +34,7 @@ app.use(cors({
     return callback(Object.assign(new Error('Origem não permitida.'), { status: 403 }));
   },
   credentials: true,
-  methods: ['GET', 'POST', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json({ limit: '32kb' }));
@@ -50,6 +50,34 @@ app.get('/', (_request, response) => {
 
 app.get('/dashboard', requirePageAuth, (_request, response) => {
   response.sendFile(path.join(frontendPath, 'pages', 'dashboard.html'));
+});
+
+app.get('/agenda', requirePageAuth, (_request, response) => {
+  response.sendFile(path.join(frontendPath, 'pages', 'agenda.html'));
+});
+
+app.get('/clientes', requirePageAuth, (_request, response) => {
+  response.sendFile(path.join(frontendPath, 'pages', 'clientes.html'));
+});
+
+app.get('/servicos', requirePageAuth, (_request, response) => {
+  response.sendFile(path.join(frontendPath, 'pages', 'servicos.html'));
+});
+
+app.get('/profissionais', requirePageAuth, (_request, response) => {
+  response.sendFile(path.join(frontendPath, 'pages', 'profissionais.html'));
+});
+
+app.get('/cupons', requirePageAuth, (_request, response) => {
+  response.sendFile(path.join(frontendPath, 'pages', 'cupons.html'));
+});
+
+app.get('/reservas', requirePageAuth, (_request, response) => {
+  response.sendFile(path.join(frontendPath, 'pages', 'reservas.html'));
+});
+
+app.get('/agendar/:slug', (_request, response) => {
+  response.sendFile(path.join(frontendPath, 'pages', 'booking.html'));
 });
 
 app.use(notFound);

@@ -11,6 +11,42 @@
 .message-preview p { font-size: 11px; }
 .team-list strong { font-size: 10px; }
 
+.hero-brand-word { display: inline-flex; align-items: baseline; white-space: nowrap; }
+.hero-logo-letter {
+  position: relative;
+  display: inline-block;
+  width: .7em;
+  height: .86em;
+  margin: 0 .015em 0 .025em;
+  overflow: visible;
+  transform: translateY(.08em);
+}
+.hero-logo-letter img {
+  position: absolute;
+  width: 2em;
+  max-width: none;
+  height: 1.33em;
+  left: -.27em;
+  top: -.29em;
+  object-fit: contain;
+}
+
+@media (max-width: 560px) {
+  .hero-logo-letter {
+    width: .68em;
+    height: .84em;
+    margin: 0 .04em 0 .035em;
+    transform: translateY(.045em);
+  }
+
+  .hero-logo-letter img {
+    width: 1.92em;
+    height: 1.28em;
+    left: -.25em;
+    top: -.27em;
+  }
+}
+
 
 .phone-browser { font-size: 8px; }
 .phone-shop strong { font-size: 12px; }

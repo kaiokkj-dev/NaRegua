@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Agenda — NaRégua</title><link rel="icon" type="image/png" href="/assets/images/favicon-rounded.png?v=3">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/base.css"><link rel="stylesheet" href="/css/dashboard.css"><link rel="stylesheet" href="/css/dashboard-responsive.css"><link rel="stylesheet" href="/css/agenda.css"><link rel="stylesheet" href="/css/dashboard-dark.css">
+<link rel="stylesheet" href="/css/mobile-lists.css"></head>
+<body class="dashboard-body">
+  <aside id="dashboard-sidebar"></aside><div class="sidebar-overlay" data-sidebar-close></div>
+  <main class="dashboard-main">
+    <header class="dashboard-header"><button class="mobile-menu" data-sidebar-open>☰</button><div class="search">⌕ <input type="search" placeholder="Buscar na agenda..."></div><div class="header-actions"><div class="user"><span>NR</span><div><strong>Usuário</strong><small>Administrador</small></div></div></div></header>
+    <div class="dashboard-content agenda-content">
+      <div class="page-title"><div><small>ORGANIZAÇÃO DO DIA</small><h1>Agenda</h1><p>Confirme, acompanhe ou cancele os horários da sua barbearia.</p></div><a class="button button-primary" href="/dashboard">＋ Novo agendamento</a></div>
+      <section class="agenda-toolbar panel"><button data-day-prev aria-label="Dia anterior">←</button><label><span>DATA</span><input type="date" data-agenda-date></label><button data-day-next aria-label="Próximo dia">→</button><div class="agenda-counts"><span><b data-count-total>0</b> horários</span><span><b data-count-confirmed>0</b> confirmados</span><span><b data-count-pending>0</b> pendentes</span></div></section>
+      <section class="panel agenda-panel"><div class="panel-head"><div><h2 data-agenda-title>Agenda do dia</h2><p>Os horários aparecem em ordem de atendimento.</p></div></div><div class="agenda-list" data-agenda-list></div></section>
+    </div>
+  </main>
+  <script type="module" src="/js/agenda.js"></script>
+</body></html>

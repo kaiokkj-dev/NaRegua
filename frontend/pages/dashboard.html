@@ -4,13 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — NaRégua</title>
-  <link rel="icon" href="/assets/images/logo-icon.png">
+  <link rel="icon" type="image/png" href="/assets/images/favicon-rounded.png?v=3">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/dashboard.css">
   <link rel="stylesheet" href="/css/dashboard-responsive.css">
+  <link rel="stylesheet" href="/css/dashboard-dark.css">
+  <link rel="stylesheet" href="/css/dashboard-appointments-mobile.css">
+  <link rel="stylesheet" href="/css/mobile-dialogs.css">
 </head>
 <body class="dashboard-body">
   <aside id="dashboard-sidebar"></aside>
@@ -22,22 +25,39 @@
       <div class="header-actions"><button aria-label="Notificações">♢<i></i></button><div class="user"><span>RF</span><div><strong>Rafael Freitas</strong><small>Administrador</small></div><b>⌄</b></div></div>
     </header>
     <div class="dashboard-content">
-      <div class="page-title"><div><small>SEGUNDA-FEIRA, 17 DE AGOSTO</small><h1>Bom dia, Rafael! <span>👋</span></h1><p>Acompanhe o movimento da sua barbearia hoje.</p></div><button class="button button-primary">＋ Novo agendamento</button></div>
+      <div class="page-title"><div><small data-today-label>HOJE</small><h1>Bom dia, <span data-first-name>Rafael</span>! <span>👋</span></h1><p>Acompanhe o movimento da sua barbearia hoje.</p></div><button class="button button-primary" data-new-appointment>＋ Novo agendamento</button></div>
+      <div class="public-booking-bar" data-public-booking hidden><div><small>SEU LINK DE AGENDAMENTO</small><strong data-public-url></strong></div><button type="button" data-copy-public-link>Copiar link</button><a data-open-public-link target="_blank" rel="noopener">Abrir ↗</a></div>
       <section class="stats-grid">
-        <article><div class="stat-head"><span class="stat-icon">▣</span><em class="up">↗ 18%</em></div><small>AGENDAMENTOS HOJE</small><strong>12</strong><p>3 aguardando confirmação</p></article>
-        <article><div class="stat-head"><span class="stat-icon">$</span><em class="up">↗ 12%</em></div><small>RECEITA PREVISTA</small><strong>R$ 860</strong><p>R$ 540 já confirmados</p></article>
-        <article><div class="stat-head"><span class="stat-icon">♙</span><em class="up">↗ 8%</em></div><small>CLIENTES HOJE</small><strong>10</strong><p>2 novos clientes</p></article>
-        <article class="next-card"><div class="stat-head"><span class="stat-icon">◷</span><em>EM 18 MIN</em></div><small>PRÓXIMO HORÁRIO</small><strong>10:30</strong><p>Marcos Oliveira · Corte + Barba</p></article>
+        <article><div class="stat-head"><span class="stat-icon">▣</span></div><small>AGENDAMENTOS HOJE</small><strong data-stat-total>0</strong><p><span data-stat-pending>0</span> aguardando confirmação</p></article>
+        <article><div class="stat-head"><span class="stat-icon">$</span></div><small>RECEITA PREVISTA</small><strong data-stat-revenue>R$ 0</strong><p>Atendimentos ativos do dia</p></article>
+        <article><div class="stat-head"><span class="stat-icon">♙</span></div><small>CLIENTES HOJE</small><strong data-stat-clients>0</strong><p>Clientes únicos agendados</p></article>
+        <article class="next-card"><div class="stat-head"><span class="stat-icon">◷</span></div><small>PRÓXIMO HORÁRIO</small><strong data-next-time>—</strong><p data-next-description>Nenhum horário futuro</p></article>
       </section>
       <section class="dashboard-grid">
         <article class="panel appointments">
-          <div class="panel-head"><div><h2>Próximos agendamentos</h2><p>Seus próximos atendimentos de hoje</p></div><a href="#">Ver agenda completa →</a></div>
+          <div class="panel-head"><div><h2>Próximos agendamentos</h2><p>Seus próximos atendimentos de hoje</p></div><a href="/agenda">Ver agenda completa →</a></div>
           <div class="table-wrap"><table><thead><tr><th>HORÁRIO</th><th>CLIENTE</th><th>SERVIÇO</th><th>PROFISSIONAL</th><th>STATUS</th><th></th></tr></thead><tbody id="appointments-list"></tbody></table></div>
         </article>
-        <aside class="panel summary"><div class="panel-head"><div><h2>Resumo do dia</h2><p>Visão geral dos atendimentos</p></div><button>•••</button></div><div class="donut-wrap"><div class="donut"><span><strong>12</strong><small>total</small></span></div><div class="legend"><p><i class="confirmed"></i><span>Confirmados</span><b>8</b></p><p><i class="pending"></i><span>Pendentes</span><b>3</b></p><p><i class="cancelled"></i><span>Cancelados</span><b>1</b></p></div></div><div class="occupancy"><div><span>Ocupação da agenda</span><strong>78%</strong></div><i><b></b></i><small>Você ainda tem 4 horários disponíveis hoje.</small></div></aside>
+        <aside class="panel summary"><div class="panel-head"><div><h2>Resumo do dia</h2><p>Visão geral dos atendimentos</p></div><button>•••</button></div><div class="donut-wrap"><div class="donut"><span><strong data-summary-total>0</strong><small>total</small></span></div><div class="legend"><p><i class="confirmed"></i><span>Confirmados</span><b data-summary-confirmed>0</b></p><p><i class="pending"></i><span>Pendentes</span><b data-summary-pending>0</b></p><p><i class="cancelled"></i><span>Cancelados</span><b data-summary-cancelled>0</b></p></div></div><div class="occupancy"><div><span>Ocupação da agenda</span><strong data-occupancy>0%</strong></div><i><b data-occupancy-bar></b></i><small>Baseado em até 12 horários por dia.</small></div></aside>
       </section>
     </div>
   </main>
+  <dialog class="appointment-dialog" data-appointment-dialog>
+    <form data-appointment-form>
+      <div class="dialog-head"><div><small>NOVO AGENDAMENTO</small><h2>Adicionar à agenda</h2></div><button type="button" data-dialog-close aria-label="Fechar">×</button></div>
+      <div class="form-grid">
+        <label>Cliente<input name="clientName" required maxlength="100" placeholder="Nome do cliente"></label>
+        <label>WhatsApp<input name="phone" required maxlength="30" placeholder="(11) 99999-9999"></label>
+        <label>Serviço<input name="serviceName" required maxlength="100" placeholder="Ex.: Corte + Barba"></label>
+        <label>Profissional<select name="professionalId" data-professional-select><option value="">A definir</option></select></label>
+        <label>Data e horário<input name="startsAt" type="datetime-local" required></label>
+        <label>Duração (min)<input name="duration" type="number" min="5" max="480" value="30" required></label>
+        <label>Valor (R$)<input name="price" type="number" min="0" step="0.01" value="0"></label>
+      </div>
+      <p class="dialog-error" data-dialog-error></p>
+      <div class="dialog-actions"><button type="button" class="button button-ghost" data-dialog-close>Cancelar</button><button class="button button-primary" type="submit">Salvar agendamento</button></div>
+    </form>
+  </dialog>
   <script type="module" src="/js/dashboard.js"></script>
 </body>
 </html>

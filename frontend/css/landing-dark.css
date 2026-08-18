@@ -17,10 +17,11 @@
 
 .pricing { background: radial-gradient(circle at 50% 10%, #242015 0, #121315 35%, #0d0e10 100%); color: #f5f5f5; border-top: 1px solid #25231b; }
 .pricing .section-heading p { color: #96979c; }
-.pricing-controls { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; max-width: 820px; margin: 0 auto 36px; padding: 22px; border: 1px solid #34353a; border-radius: 14px; background: #18191d; box-shadow: 0 14px 45px rgba(0,0,0,.22); }
+.pricing-controls { position: relative; display: grid; grid-template-columns: auto auto; justify-content: space-between; gap: 32px; max-width: 760px; margin: 0 auto 36px; padding: 20px 22px; border: 1px solid #34353a; border-radius: 14px; background: #18191d; box-shadow: 0 14px 45px rgba(0,0,0,.22); }
 .control-group small { display: block; margin: 0 0 10px 4px; color: #77797f; font-size: 9px; font-weight: 800; letter-spacing: 1.2px; }
+.control-group { width: max-content; max-width: 100%; }
 .billing-control { justify-self: end; }
-.segmented { display: flex; gap: 4px; padding: 4px; border-radius: 10px; background: #0f1012; }
+.segmented { display: flex; width: max-content; max-width: 100%; gap: 4px; padding: 4px; border-radius: 10px; background: #0f1012; }
 .segmented button { min-width: 50px; height: 34px; padding: 0 12px; border: 0; border-radius: 7px; color: #96979b; background: transparent; font-size: 11px; font-weight: 700; cursor: pointer; }
 .segmented button.active { color: #111; background: #ffc400; box-shadow: 0 4px 15px rgba(255,196,0,.18); }
 .segmented em { margin-left: 4px; color: #43b980; font-size: 8px; font-style: normal; }
@@ -59,10 +60,10 @@
 }
 
 @media (max-width: 600px) {
-  .pricing-controls { grid-template-columns: 1fr; gap: 20px; padding: 18px; }
+  .pricing-controls { grid-template-columns: 1fr; justify-content: stretch; gap: 20px; padding: 18px; }
   .billing-control { justify-self: start; }
   .saving-note { grid-column: auto; margin-top: -4px; }
-  .segmented { width: 100%; }
-  .segmented button { flex: 1; min-width: 0; padding-inline: 8px; }
+  .segmented { width: max-content; }
+  .segmented button { flex: 0 0 auto; min-width: 54px; padding-inline: 10px; }
   .pricing-bottom { align-items: stretch; flex-direction: column; }
 }
