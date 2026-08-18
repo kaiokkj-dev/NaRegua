@@ -1,16 +1,18 @@
+require('dotenv').config();
+
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const helmet = require('helmet');
-const apiRouter = require('./routes');
-const { notFound, errorHandler } = require('./middleware/error-handler');
-const { requirePageAuth } = require('./middleware/auth');
-const { passport } = require('./config/passport');
-const { env } = require('./config/env');
+const apiRouter = require('./backend/routes');
+const { notFound, errorHandler } = require('./backend/middleware/error-handler');
+const { requirePageAuth } = require('./backend/middleware/auth');
+const { passport } = require('./backend/config/passport');
+const { env } = require('./backend/config/env');
 
 const app = express();
-const frontendPath = path.resolve(__dirname, '..', 'frontend');
+const publicPath = path.join(__dirname, 'public');
 
 app.disable('x-powered-by');
 app.set('trust proxy', env.isProduction ? 1 : false);
@@ -54,45 +56,49 @@ app.use(express.urlencoded({ extended: false, limit: '32kb' }));
 app.use(cookieParser());
 app.use(passport.initialize());
 app.use('/api', apiRouter);
-app.use(express.static(frontendPath));
+app.use(express.static(publicPath));
 
 app.get('/', (_request, response) => {
-  response.sendFile(path.join(frontendPath, 'pages', 'index.html'));
+  response.sendFile(path.join(publicPath, 'pages', 'index.html'));
 });
 
 app.get('/dashboard', requirePageAuth, (_request, response) => {
-  response.sendFile(path.join(frontendPath, 'pages', 'dashboard.html'));
+  response.sendFile(path.join(publicPath, 'pages', 'dashboard.html'));
 });
 
 app.get('/agenda', requirePageAuth, (_request, response) => {
-  response.sendFile(path.join(frontendPath, 'pages', 'agenda.html'));
+  response.sendFile(path.join(publicPath, 'pages', 'agenda.html'));
 });
 
 app.get('/clientes', requirePageAuth, (_request, response) => {
-  response.sendFile(path.join(frontendPath, 'pages', 'clientes.html'));
+  response.sendFile(path.join(publicPath, 'pages', 'clientes.html'));
 });
 
 app.get('/servicos', requirePageAuth, (_request, response) => {
-  response.sendFile(path.join(frontendPath, 'pages', 'servicos.html'));
+  response.sendFile(path.join(publicPath, 'pages', 'servicos.html'));
 });
 
 app.get('/profissionais', requirePageAuth, (_request, response) => {
-  response.sendFile(path.join(frontendPath, 'pages', 'profissionais.html'));
+  response.sendFile(path.join(publicPath, 'pages', 'profissionais.html'));
 });
 
 app.get('/cupons', requirePageAuth, (_request, response) => {
-  response.sendFile(path.join(frontendPath, 'pages', 'cupons.html'));
+  response.sendFile(path.join(publicPath, 'pages', 'cupons.html'));
 });
 
 app.get('/reservas', requirePageAuth, (_request, response) => {
-  response.sendFile(path.join(frontendPath, 'pages', 'reservas.html'));
+  response.sendFile(path.join(publicPath, 'pages', 'reservas.html'));
 });
 
 app.get('/agendar/:slug', (_request, response) => {
-  response.sendFile(path.join(frontendPath, 'pages', 'booking.html'));
+  response.sendFile(path.join(publicPath, 'pages', 'booking.html'));
 });
 
 app.use(notFound);
 app.use(errorHandler);
+
+app.listen(env.port, () => {
+  console.log(`NaRégua disponível na porta ${env.port}`);
+});
 
 module.exports = app;
