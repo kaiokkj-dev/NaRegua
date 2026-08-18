@@ -9,7 +9,7 @@
     "start": "node backend/server.js"
   },
   "engines": {
-    "node": ">=20"
+    "node": "20.x"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.55.0",
