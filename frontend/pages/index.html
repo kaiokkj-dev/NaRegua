@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NaRégua: gestão e agendamento para barbearias modernas.">
+  <title>NaRégua — Gestão para barbearias</title>
+  <link rel="icon" href="/assets/images/logo-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/landing.css">
+  <link rel="stylesheet" href="/css/landing-dark.css">
+  <link rel="stylesheet" href="/css/landing-polish.css">
+  <link rel="stylesheet" href="/css/hero-signup.css">
+  <link rel="stylesheet" href="/css/features-showcase.css">
+  <link rel="stylesheet" href="/css/onboarding.css">
+  <link rel="stylesheet" href="/css/onboarding-v2.css">
+  <link rel="stylesheet" href="/css/readability.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/css/footer-simple.css">
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <div class="hero-glow"></div>
+      <div class="container hero-grid">
+        <div class="hero-copy reveal">
+          <div class="eyebrow"><span></span> A nova rotina da sua barbearia</div>
+          <h1>Sua barbearia organizada. Seus clientes na agenda. <em>Tudo NaRégua.</em></h1>
+          <p>Agenda, equipe, serviços e clientes em um só lugar. Menos tempo organizando, mais tempo fazendo o seu melhor.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="/dashboard">Começar grátis <span>→</span></a>
+            <a class="button button-ghost" href="#como-funciona"><span class="play">▶</span> Ver como funciona</a>
+          </div>
+          <div class="trust"><div class="avatars"><span>JL</span><span>RC</span><span>BM</span></div><p><strong>Feito para quem faz acontecer</strong><br>Gestão simples, do seu jeito.</p></div>
+        </div>
+        <div class="signup-side reveal">
+          <div class="signup-callout"><span>↘</span><div><strong>Comece por aqui</strong><small>Leva menos de 2 minutos</small></div><img src="/assets/images/logo-icon.png" alt="Símbolo NaRégua"></div>
+          <form class="signup-card" id="signup-form" novalidate>
+            <div class="form-intro"><span>◷</span> Crie sua conta grátis</div>
+            <label><span>Seu nome</span><input name="name" type="text" autocomplete="name" placeholder="Como podemos chamar você?" required></label>
+            <label><span>Seu melhor e-mail</span><input name="email" type="email" autocomplete="email" placeholder="voce@exemplo.com" required></label>
+            <label><span>WhatsApp com DDD</span><input name="phone" type="tel" autocomplete="tel" placeholder="(11) 99999-9999" required></label>
+            <label><span>Nome da barbearia</span><input name="shop" type="text" autocomplete="organization" placeholder="Ex.: Barbearia Central" required></label>
+            <button class="button button-primary signup-submit" type="submit">Começar grátis <span>→</span></button>
+            <p class="form-feedback" role="status" aria-live="polite"></p>
+            <div class="form-divider"><span>ou continue com</span></div>
+            <button class="social-button" type="button" data-provider="Google"><b class="google-mark">G</b> Entrar com Google</button>
+            <div class="form-trust"><span>✓ 14 dias grátis</span><span>✓ Sem cartão de crédito</span></div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="features section" id="funcionalidades">
+      <div class="container">
+        <div class="features-intro reveal">
+          <div><div class="eyebrow"><span></span> Feito para a rotina real</div><h2>Menos improviso.<br>Mais controle.</h2></div>
+          <p>Do primeiro horário ao fechamento do caixa, o NaRégua centraliza o que sua equipe precisa para trabalhar bem.</p>
+        </div>
+        <div class="product-grid">
+          <article class="product-card schedule-card reveal">
+            <div class="product-copy"><span class="feature-number">01 / AGENDA</span><h3>Seu dia inteiro, de relance.</h3><p>Horários, serviços e profissionais em uma agenda clara. Encaixes ficam fáceis e conflitos deixam de acontecer.</p><a href="/dashboard">Abrir agenda <span>→</span></a></div>
+            <div class="schedule-preview">
+              <div class="schedule-head"><strong>Hoje, 17 ago.</strong><span>12 agendamentos</span></div>
+              <div class="schedule-row"><b>09:00</b><i></i><p><strong>Corte degradê</strong><small>João Pedro · Bruno</small></p><em>45 min</em></div>
+              <div class="schedule-row active"><b>10:30</b><i></i><p><strong>Corte + barba</strong><small>Marcos Oliveira · Rafael</small></p><em>60 min</em></div>
+              <div class="schedule-row"><b>12:00</b><i></i><p><strong>Barba</strong><small>Carlos Lima · Rafael</small></p><em>30 min</em></div>
+            </div>
+          </article>
+
+          <article class="product-card reminder-card reveal">
+            <span class="feature-number">02 / AUTOMAÇÃO</span><h3>O cliente não esquece.</h3><p>Lembretes automáticos reduzem faltas e liberam sua equipe das confirmações manuais.</p>
+            <div class="message-preview"><div class="message-avatar">N</div><div><strong>NaRégua</strong><p>Olá, Marcos! Seu horário está confirmado para hoje às 10:30. ✂</p><small>Enviado automaticamente · 09:00</small></div></div>
+          </article>
+
+          <article class="product-card team-card reveal">
+            <span class="feature-number">03 / EQUIPE</span><h3>Cada profissional no seu ritmo.</h3><p>Disponibilidade, agenda e desempenho individual sem planilhas paralelas.</p>
+            <div class="team-list"><div><span class="avatar yellow">RF</span><p><strong>Rafael</strong><small>5 atendimentos hoje</small></p><b>87%</b></div><div><span class="avatar purple">BR</span><p><strong>Bruno</strong><small>4 atendimentos hoje</small></p><b>72%</b></div><div><span class="avatar green">LC</span><p><strong>Lucas</strong><small>3 atendimentos hoje</small></p><b>64%</b></div></div>
+          </article>
+
+          <article class="product-card customer-card reveal">
+            <span class="feature-number">04 / CLIENTES</span><h3>Atendimento com contexto.</h3><p>Preferências, histórico e frequência reunidos para você reconhecer quem volta.</p>
+            <div class="customer-panel">
+              <div class="customer-metrics"><div><small>CLIENTES ATIVOS</small><strong>248</strong><em>↗ 18% este mês</em></div><div><small>NOVOS NO MÊS</small><strong>32</strong><em>↗ 8 na semana</em></div></div>
+              <div class="retention-row"><div><span>Retenção de clientes</span><strong>76%</strong></div><i><b></b></i></div>
+              <div class="returning"><span class="avatar-stack"><i>MO</i><i>JP</i><i>CL</i></span><p><strong>18 clientes retornaram</strong><small>nos últimos 7 dias</small></p></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="onboarding section" id="como-funciona">
+      <div class="container">
+        <div class="onboarding-title reveal"><div class="eyebrow"><span></span> Como funciona</div><h2>Agendar nunca foi tão simples.</h2><p>Da escolha do serviço à confirmação, seus clientes resolvem tudo em poucos toques.</p></div>
+        <div class="onboarding-demo reveal">
+          <div class="phone-stage"><div class="phone-orbit"></div><div class="phone-mockup"><div class="phone-speaker"></div><div class="phone-browser"><i></i> naregua.app/barbearia-do-rafa</div><div class="phone-shop"><span>BR</span><div><strong>Barbearia do Rafa</strong><small>★ 4,9 · Aberto hoje</small></div></div><div class="phone-screen" data-phone-screen><small>ESCOLHA UM SERVIÇO</small><div class="phone-option active"><span><strong>Corte</strong><small>◷ 45 min</small></span><b>R$ 45</b></div><div class="phone-option"><span><strong>Barba</strong><small>◷ 30 min</small></span><b>R$ 35</b></div><div class="phone-option"><span><strong>Corte + Barba</strong><small>◷ 60 min</small></span><b>R$ 70</b></div></div><button>Continuar →</button></div><div class="phone-caption"><span>●</span> Demonstração interativa</div></div>
+          <div class="demo-steps" data-demo-steps><button class="active" data-step="service"><span>01</span><div><strong>Escolha o serviço</strong><small>Corte, barba ou um combo completo, com preço e duração claros.</small></div></button><button data-step="time"><span>02</span><div><strong>Defina um horário</strong><small>O cliente vê apenas os horários realmente disponíveis na agenda.</small></div></button><button data-step="confirm"><span>03</span><div><strong>Confirmação automática</strong><small>A reserva é confirmada e o lembrete chega pelo WhatsApp.</small></div></button><button data-step="manage"><span>04</span><div><strong>Você acompanha tudo</strong><small>O novo horário aparece no painel da barbearia em tempo real.</small></div></button><p><i></i> Toque nas etapas para ver o fluxo</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pricing section" id="precos">
+      <div class="container">
+        <div class="section-heading reveal">
+          <div class="eyebrow"><span></span> Planos transparentes</div>
+          <h2>Um plano que acompanha o seu ritmo.</h2>
+          <p>Comece sozinho ou organize toda a equipe. Sem taxa de adesão e sem letras miúdas.</p>
+        </div>
+
+        <div class="pricing-controls reveal">
+          <div class="control-group">
+            <small>QUANTOS PROFISSIONAIS?</small>
+            <div class="segmented" data-team-selector>
+              <button class="active" data-team="1">1</button>
+              <button data-team="3">3</button>
+              <button data-team="6">6</button>
+              <button data-team="10">10+</button>
+            </div>
+          </div>
+          <div class="control-group billing-control">
+            <small>COBRANÇA</small>
+            <div class="segmented" data-billing-selector>
+              <button class="active" data-billing="monthly">Mensal</button>
+              <button data-billing="annual">Anual <em>−20%</em></button>
+            </div>
+          </div>
+          <p class="saving-note">No anual, você economiza dois meses do plano Pro.</p>
+        </div>
+
+        <div class="plans-grid">
+          <article class="plan-card reveal">
+            <div class="plan-top"><h3>Essencial</h3><span>1 PROFISSIONAL</span></div>
+            <p>Para começar a organizar sua rotina sem complicação.</p>
+            <div class="plan-price"><strong>R$ 0</strong><span>/mês</span></div>
+            <small>Para sempre. Sem cartão.</small>
+            <a class="button plan-button" href="/dashboard">Começar grátis</a>
+            <div class="plan-features"><b>PARA COMEÇAR</b><p>✓ Até 100 agendamentos por mês</p><p>✓ Página pública de agendamento</p><p>✓ Cadastro de clientes e serviços</p></div>
+          </article>
+
+          <article class="plan-card plan-highlight reveal">
+            <div class="popular">MAIS ESCOLHIDO</div>
+            <div class="plan-top"><h3>Pro</h3><span>GESTÃO COMPLETA</span></div>
+            <p>Automação e controle para uma barbearia em crescimento.</p>
+            <div class="plan-price"><strong data-pro-price>R$ 29,90</strong><span>/mês</span></div>
+            <small data-pro-caption>Para 1 profissional</small>
+            <a class="button button-primary" href="/dashboard">Testar grátis por 14 dias</a>
+            <div class="plan-features"><b>TUDO DO ESSENCIAL, E MAIS</b><p>✓ Agendamentos ilimitados</p><p>✓ Lembretes automáticos</p><p>✓ Gestão de equipe e comissões</p><p>✓ Relatórios de faturamento</p><p>✓ Suporte prioritário</p></div>
+          </article>
+
+          <article class="plan-card reveal">
+            <div class="plan-top"><h3>Black</h3><span>TUDO INCLUSO</span></div>
+            <p>Para operações maiores que querem escala e exclusividade.</p>
+            <div class="plan-price"><strong data-black-price>R$ 59,90</strong><span>/mês</span></div>
+            <small data-black-caption>Para 1 profissional</small>
+            <a class="button plan-button" href="/dashboard">Falar com especialista</a>
+            <div class="plan-features"><b>TUDO DO PRO, E MAIS</b><p>✓ Múltiplas unidades</p><p>✓ Domínio e identidade personalizados</p><p>✓ Campanhas de relacionamento</p><p>✓ Permissões avançadas</p><p>✓ Atendimento dedicado</p></div>
+          </article>
+        </div>
+
+        <div class="pricing-bottom"><div><span>✦</span><p><strong>Teste grátis por 14 dias</strong><small>Cancele quando quiser. Seus dados continuam sendo seus.</small></p></div><a class="button button-primary" href="/dashboard">Começar agora →</a></div>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-main">
+        <div class="footer-brand"><a class="brand brand-light" href="/"><img src="/assets/images/logo-icon.png" alt=""><span>Na<strong>Régua</strong></span></a><p>Gestão e agendamento para barbearias.</p></div>
+        <nav class="footer-links"><a href="#funcionalidades">Funcionalidades</a><a href="#como-funciona">Como funciona</a><a href="#precos">Preços</a><a href="/dashboard">Dashboard</a></nav>
+        <a class="footer-contact" href="mailto:contato@naregua.com.br"><small>FALE COM A GENTE</small><strong>contato@naregua.com.br</strong></a>
+      </div>
+      <div class="footer-bottom"><p>© <span id="year"></span> NaRégua. Todos os direitos reservados.</p><div class="legal"><a href="#">Privacidade</a><a href="#">Termos de uso</a></div></div>
+    </div>
+  </footer>
+  <script type="module" src="/js/landing.js"></script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+/* Ajuste final de legibilidade para demonstrações e recursos. */
+.features-intro > p { max-width: 460px; font-size: 17px; line-height: 1.65; }
+.product-card h3 { font-size: 25px; }
+.product-card > p,
+.product-copy > p { max-width: 460px; font-size: 14px; }
+.schedule-head { font-size: 13px; }
+.schedule-row > b,
+.schedule-row strong { font-size: 12px; }
+.schedule-row small,
+.schedule-row em { font-size: 9px; }
+.message-preview p { font-size: 11px; }
+.team-list strong { font-size: 10px; }
+
+
+.phone-browser { font-size: 8px; }
+.phone-shop strong { font-size: 12px; }
+.phone-shop small,
+.phone-screen > small { font-size: 8px; }
+.phone-option strong,
+.phone-option b,
+.phone-mockup > button { font-size: 11px; }
+.phone-option small { font-size: 8px; }
+.phone-success strong { font-size: 16px; }
+.phone-success p { font-size: 11px; }
+.phone-success span { font-size: 9px; }
+.phone-admin strong { font-size: 10px; }
+.phone-admin small { font-size: 8px; }
+.phone-admin > div > span { font-size: 10px; }
+
+@media (max-width: 520px) {
+  .features-intro > p { font-size: 15px; }
+  .product-card h3 { font-size: 22px; }
+
+  .onboarding { padding: 52px 0; }
+  .onboarding .container { width: calc(100% - 32px); }
+  .onboarding-title { margin-bottom: 26px; }
+  .onboarding-title .eyebrow { font-size: 10px; letter-spacing: 1.4px; }
+  .onboarding-title h2 { margin-top: 12px; font-size: 32px; line-height: 1.08; letter-spacing: -1.6px; }
+  .onboarding-title p { font-size: 13px; line-height: 1.6; }
+  .phone-stage { display: grid; min-height: 430px; margin: -12px 0 18px; overflow: hidden; }
+  .phone-orbit { width: 310px; height: 310px; }
+  .phone-mockup { width: 265px; min-height: 420px; padding: 15px 13px 13px; border-radius: 24px; box-shadow: 9px 10px 0 #080809; transform: rotate(-2deg) scale(.88); }
+  .phone-screen { min-height: 220px; }
+  .phone-option { padding: 9px; }
+  .phone-caption { bottom: 5px; }
+  .demo-steps > button { min-height: 52px; padding: 14px 2px; gap: 10px; outline: 0; }
+  .demo-steps > button:focus,
+  .demo-steps > button:focus-visible,
+  .demo-steps > button.active { border: 0; border-bottom: 1px solid #2d2e32; outline: 0; box-shadow: none; }
+  .demo-steps > button > span { font-size: 12px; }
+  .demo-steps strong { font-size: 14px; }
+}
+
+/* Densidade mais compacta da seção de funcionalidades. */
+@media (min-width: 851px) {
+  .features { padding-top: 88px; padding-bottom: 88px; }
+  .features-intro { margin-bottom: 38px; }
+  .schedule-card { min-height: 315px; padding: 34px 38px; gap: 52px; }
+  .reminder-card,
+  .team-card,
+  .customer-card { min-height: 320px; padding: 26px; }
+  .feature-number { margin-bottom: 22px; }
+  .message-preview { padding: 13px; }
+  .team-list { padding-top: 12px; }
+  .team-list > div { padding-block: 8px; }
+  .customer-panel { padding-top: 13px; }
+}
+
+/* CTA persistente: entra após o hero e não ocupa espaço na seção de preços. */
+.pricing-bottom {
+  position: fixed;
+  z-index: 60;
+  right: 24px;
+  bottom: 20px;
+  left: 24px;
+  width: min(760px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 12px 14px 12px 18px;
+  border: 1px solid #3a3b40;
+  background: rgba(23, 24, 27, .96);
+  box-shadow: 0 14px 45px rgba(0, 0, 0, .48);
+  backdrop-filter: blur(14px);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(calc(100% + 34px)) scale(.98);
+  transition:
+    opacity .28s ease,
+    transform .38s cubic-bezier(.22, 1, .36, 1),
+    visibility 0s linear .38s;
+}
+.pricing-bottom.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  transition-delay: 0s;
+}
+.pricing-bottom > div > span { width: 34px; height: 34px; }
+.pricing-bottom .button { min-height: 42px; white-space: nowrap; font-size: 11px; }
+
+.segmented button,
+.segmented button:focus,
+.segmented button:focus-visible,
+.segmented button.active {
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+}
+
+@media (max-width: 600px) {
+  .pricing-bottom {
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    width: calc(100% - 16px);
+    min-height: 58px;
+    padding: 8px 8px 8px 13px;
+    border: 0;
+    border-left: 3px solid #f5c400;
+    background: rgba(20, 21, 24, .98);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .55);
+    align-items: center;
+    flex-direction: row;
+    gap: 8px;
+  }
+  .pricing-bottom > div { min-width: 0; flex: 1; }
+  .pricing-bottom > div > span,
+  .pricing-bottom small { display: none; }
+  .pricing-bottom strong { overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+  .pricing-bottom .button { min-height: 40px; padding-inline: 12px; font-size: 0; }
+  .pricing-bottom .button::after { content: 'Começar  →'; font-size: 10px; }
+}

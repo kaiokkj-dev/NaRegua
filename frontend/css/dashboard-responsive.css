@@ -1,0 +1,6 @@
+/* Restrições de largura isoladas para que tabelas rolem dentro do painel. */
+.dashboard-body { overflow-x: hidden; }
+.dashboard-grid,
+.dashboard-grid > *,
+.panel { min-width: 0; }
+

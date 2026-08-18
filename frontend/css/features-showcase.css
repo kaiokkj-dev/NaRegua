@@ -1,0 +1,67 @@
+.features { padding: 120px 0; }
+.features-intro { display: grid; grid-template-columns: 1.2fr .8fr; align-items: end; gap: 90px; margin-bottom: 52px; }
+.features-intro h2 { margin: 15px 0 0; font: 700 clamp(38px, 5vw, 58px)/1.03 'DM Sans', sans-serif; letter-spacing: -2.8px; }
+.features-intro > p { max-width: 440px; margin: 0 0 5px; color: #96979c; font-size: 15px; line-height: 1.7; }
+.product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.product-card { position: relative; overflow: hidden; min-height: 350px; padding: 32px; border: 1px solid #2d2e32; background: #17181b; }
+.feature-number { display: block; margin-bottom: 32px; color: #d6aE00; font-size: 9px; font-weight: 800; letter-spacing: 1.4px; }
+.product-card h3 { max-width: 390px; margin: 0 0 13px; font-size: 23px; letter-spacing: -.6px; }
+.product-card > p, .product-copy > p { max-width: 440px; margin: 0; color: #8f9095; font-size: 13px; line-height: 1.65; }
+.schedule-card { grid-column: 1 / -1; min-height: 390px; display: grid; grid-template-columns: .8fr 1.2fr; align-items: center; gap: 65px; padding: 45px; }
+.product-copy a { display: inline-flex; gap: 10px; margin-top: 28px; color: #f5c400; font-size: 12px; font-weight: 700; }
+.schedule-preview { padding: 16px; border: 1px solid #303136; background: #111214; box-shadow: 9px 9px 0 #0b0b0c; }
+.schedule-head { display: flex; justify-content: space-between; padding: 8px 7px 17px; font-size: 11px; }
+.schedule-head span { color: #74757a; font-size: 9px; }
+.schedule-row { display: grid; grid-template-columns: 43px 7px 1fr auto; align-items: center; gap: 12px; padding: 13px 10px; border-top: 1px solid #28292d; }
+.schedule-row.active { margin-inline: -4px; padding-inline: 14px; border: 1px solid #665600; background: #242116; }
+.schedule-row > b { font-size: 10px; }
+.schedule-row > i { width: 6px; height: 6px; background: #777; }
+.schedule-row.active > i { background: #f5c400; }
+.schedule-row p { margin: 0; }
+.schedule-row strong, .schedule-row small { display: block; }
+.schedule-row strong { font-size: 10px; }
+.schedule-row small { margin-top: 4px; color: #6f7075; font-size: 8px; }
+.schedule-row em { color: #85868b; font-size: 8px; font-style: normal; }
+.reminder-card, .team-card, .customer-card { min-height: 355px; display: flex; flex-direction: column; }
+.message-preview { display: flex; gap: 12px; margin-top: auto; padding: 16px; border-left: 2px solid #f5c400; background: #202124; }
+.message-avatar { flex: 0 0 31px; height: 31px; display: grid; place-items: center; background: #f5c400; color: #111; font-size: 11px; font-weight: 800; }
+.message-preview strong { font-size: 10px; }
+.message-preview p { margin: 5px 0; color: #c4c5c8; font-size: 10px; line-height: 1.45; }
+.message-preview small { color: #696a6f; font-size: 7px; }
+.team-list { margin-top: auto; padding-top: 18px; border-top: 1px solid #2b2c30; }
+.team-list > div { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #292a2e; }
+.avatar { width: 29px; height: 29px; display: grid; place-items: center; color: #141414; background: #f5c400; font-size: 8px; font-weight: 800; }
+.avatar.purple { background: #a98ad2; }.avatar.green { background: #72b594; }
+.team-list p { flex: 1; margin: 0; }.team-list strong, .team-list small { display: block; }.team-list strong { font-size: 9px; }.team-list small { margin-top: 3px; color: #6e6f74; font-size: 7px; }.team-list b { color: #b0b1b5; font-size: 9px; }
+.customer-panel { margin-top: auto; padding-top: 18px; border-top: 1px solid #2b2c30; }
+.customer-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.customer-metrics > div + div { padding-left: 18px; border-left: 1px solid #2b2c30; }
+.customer-metrics small, .customer-metrics strong, .customer-metrics em { display: block; }
+.customer-metrics small { color: #6e6f74; font-size: 7px; letter-spacing: .9px; }
+.customer-metrics strong { margin: 4px 0; font-size: 23px; }
+.customer-metrics em { color: #62b487; font-size: 7px; font-style: normal; }
+.retention-row { margin-top: 16px; }
+.retention-row > div { display: flex; justify-content: space-between; margin-bottom: 7px; color: #929398; font-size: 8px; }
+.retention-row > div strong { color: #f5f5f5; }
+.retention-row > i { display: block; height: 4px; background: #292a2e; }
+.retention-row > i b { display: block; width: 76%; height: 100%; background: #f5c400; }
+.returning { display: flex; align-items: center; gap: 10px; margin-top: 15px; }
+.avatar-stack { display: flex; }
+.avatar-stack i { width: 24px; height: 24px; display: grid; place-items: center; margin-left: -5px; border: 2px solid #17181b; background: #34353a; color: #d1d2d4; font-size: 6px; font-style: normal; }
+.avatar-stack i:first-child { margin-left: 0; background: #4b4215; }
+.returning p { margin: 0; }.returning strong, .returning small { display: block; }.returning strong { font-size: 8px; }.returning small { margin-top: 2px; color: #68696e; font-size: 7px; }
+
+@media (max-width: 850px) {
+  .features-intro { grid-template-columns: 1fr; gap: 22px; }
+  .product-grid { grid-template-columns: 1fr; }
+  .schedule-card { grid-column: auto; grid-template-columns: 1fr; gap: 35px; padding: 32px; }
+  .reminder-card, .team-card, .customer-card { min-height: 330px; }
+}
+
+@media (max-width: 520px) {
+  .features { padding: 85px 0; }
+  .features-intro h2 { font-size: 40px; letter-spacing: -2px; }
+  .product-card, .schedule-card { padding: 24px; }
+  .schedule-row { grid-template-columns: 38px 6px 1fr; gap: 8px; }
+  .schedule-row em { display: none; }
+}

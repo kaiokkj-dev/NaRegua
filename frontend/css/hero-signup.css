@@ -1,0 +1,46 @@
+/* Hero sem navegação, com entrada direta para experimentação do produto. */
+.hero { min-height: 760px; padding-top: 75px; }
+.hero-grid { grid-template-columns: minmax(0, 1.1fr) minmax(350px, .72fr); gap: 90px; }
+.hero-copy { padding-top: 20px; }
+.signup-side { width: 100%; max-width: 430px; margin-left: auto; }
+.signup-callout { height: 82px; display: flex; align-items: center; gap: 14px; padding: 0 18px; }
+.signup-callout > span { color: var(--yellow); font-size: 33px; transform: rotate(18deg); }
+.signup-callout strong, .signup-callout small { display: block; }
+.signup-callout strong { font-size: 22px; line-height: 1; }
+.signup-callout small { margin-top: 7px; color: #74757a; font-size: 10px; }
+.signup-callout img { width: 58px; height: 58px; margin-left: auto; border: 1px solid #3b3c40; border-radius: 12px; }
+.signup-card { padding: 27px; border: 1px solid #303136; background: #18191b; box-shadow: 12px 14px 0 #080809; }
+.form-intro { margin-bottom: 21px; color: #a7a8ac; font-size: 11px; }
+.form-intro span { margin-right: 7px; color: var(--yellow); }
+.signup-card label { display: block; margin-bottom: 14px; }
+.signup-card label > span { display: block; margin: 0 0 7px 2px; color: #b9babe; font-size: 10px; font-weight: 600; letter-spacing: .2px; }
+.signup-card input { width: 100%; height: 51px; padding: 0 15px; border: 1px solid #37383d; border-radius: 4px; outline: none; color: #f5f5f5; background: #202124; font-size: 13px; transition: border-color .2s, background .2s; }
+.signup-card input::placeholder { color: #707176; }
+.signup-card input:focus { border-color: var(--yellow); background: #232326; }
+.signup-card input.invalid { border-color: #c75d55; }
+.signup-submit { width: 100%; height: 54px; margin-top: 2px; font-size: 14px; }
+.signup-submit span { font-size: 19px; }
+.form-feedback { min-height: 15px; margin: 8px 0 0; color: #d56d65; font-size: 10px; text-align: center; }
+.form-feedback.success { color: #66c995; }
+.form-divider { display: flex; align-items: center; gap: 12px; margin: 12px 0; color: #77787d; font-size: 10px; }
+.form-divider::before, .form-divider::after { content: ''; flex: 1; height: 1px; background: #34353a; }
+.social-button { width: 100%; height: 49px; margin-top: 9px; border: 1px solid #404146; border-radius: 4px; color: #dedee0; background: #2a2b2e; cursor: pointer; }
+.social-button:hover { border-color: #66676c; }
+.social-button b { display: inline-block; margin-right: 9px; }
+.google-mark { color: #4285f4; font-size: 15px; }
+.apple-button { color: #fff; background: #09090a; border-color: #09090a; }
+.form-trust { display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; color: #77787d; font-size: 9px; }
+
+@media (max-width: 960px) {
+  .hero { padding-top: 55px; }
+  .hero-grid { grid-template-columns: 1fr; gap: 45px; }
+  .signup-side { max-width: 540px; margin: auto; }
+}
+
+@media (max-width: 600px) {
+  .hero { padding-top: 35px; }
+  .signup-callout { padding-inline: 4px; }
+  .signup-callout img { width: 50px; height: 50px; }
+  .signup-card { padding: 20px; box-shadow: 7px 8px 0 #080809; }
+  .form-trust { flex-direction: column; align-items: center; gap: 5px; }
+}

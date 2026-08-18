@@ -1,0 +1,57 @@
+/* Direção visual mais editorial e sóbria: menos efeitos e mais consistência. */
+:root { --yellow: #f5c400; --yellow-2: #f5c400; }
+
+body,
+.hero-copy h1,
+.section-heading h2,
+.workflow h2,
+.cta h2,
+.plan-top h3,
+.plan-price strong,
+.preview-top strong { font-family: 'DM Sans', sans-serif; }
+
+.button { border-radius: 5px; box-shadow: none; }
+.button:hover { transform: translateY(-1px); }
+.brand img { border-radius: 12px; }
+
+.hero { background: #0d0e10; }
+.hero-glow { display: none; }
+.app-preview { border-radius: 7px; box-shadow: 18px 20px 0 #070708; transform: none; }
+.preview-sidebar img,
+.preview-avatar,
+.preview-stats > div,
+.preview-chart,
+.preview-list { border-radius: 4px; }
+.floating-note { border-radius: 4px; box-shadow: 8px 8px 0 rgba(0,0,0,.35); }
+.note-top > span { border-radius: 3px; }
+.note-bottom .mini-icon { border-radius: 3px; }
+
+.feature-card,
+.feature-card.featured { border-radius: 6px; background: #17181b; box-shadow: none; }
+.feature-card:hover { transform: translateY(-2px); box-shadow: none; border-color: #444027; }
+.feature-icon { border-radius: 4px; }
+.feature-card .tag { border-radius: 3px; }
+
+.steps { border-radius: 6px; box-shadow: none; }
+.steps b { border-radius: 4px; }
+
+.pricing { background: #101113; }
+.pricing-controls { border-radius: 6px; box-shadow: none; background: #17181b; }
+.segmented { border-radius: 4px; }
+.segmented button { border-radius: 3px; }
+.plan-card,
+.plan-card.plan-highlight { border-radius: 6px; background: #17181b; box-shadow: none; }
+.plan-card.plan-highlight { border-width: 1px; }
+.popular { border-radius: 0 0 3px 3px; }
+.plan-top span,
+.status { border-radius: 3px; }
+.plan-button { background: transparent; }
+.pricing-bottom { border-radius: 6px; }
+.pricing-bottom > div > span { border-radius: 3px; }
+
+.cta { border-radius: 6px; background: #f5c400; }
+
+@media (max-width: 700px) {
+  .header-inner nav { border-radius: 5px; }
+  .app-preview { box-shadow: 8px 9px 0 #070708; }
+}
