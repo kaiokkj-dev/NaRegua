@@ -1,4 +1,6 @@
 :root{--booking-blue:#ffc400;--booking-line:#3a3421;--booking-muted:#8f8d86}
+html{background:#101113;overscroll-behavior-y:none}
+.booking-body{background:#101113;overscroll-behavior-y:none}
 .shop-avatar{background:#ffc400;color:#111}
 .catalog-tabs{background:#242116}.catalog-tabs button{color:#b6a55f}.catalog-tabs button.active{background:#17181b;color:#fff}
 .service-card-price{color:#ffc400}.service-duration{background:#2b281d;color:#e9d994}.service-card-foot{border-color:#3b3523}.available{background:#705b0e;color:#ffe992}
