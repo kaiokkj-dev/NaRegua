@@ -1,18 +1,50 @@
 const { getSupabaseClient } = require('../config/supabase');
 const { assertNoAppointmentConflict, translateAppointmentConflict } = require('./appointment-conflict.service');
+const { getBusinessHoursForShop, assertWithinBusinessHours } = require('./business-hours.service');
+
+function normalizeName(value) {
+  return String(value || '').trim().replace(/\s+/g, ' ').slice(0, 100);
+}
+
+function normalizePhone(value) {
+  return String(value || '').replace(/\D/g, '').slice(0, 13);
+}
+
+function assertClientData(name, phone) {
+  if (name.length < 2 || !/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(name) || /\d/.test(name)) throw Object.assign(new Error('Informe um nome válido, sem números.'), { status: 400 });
+  if (phone.length < 10 || phone.length > 13) throw Object.assign(new Error('Informe um WhatsApp válido com DDD.'), { status: 400 });
+}
 
 async function getShop(slug) {
   const db = getSupabaseClient();
-  const { data: shop, error } = await db.from('barbershops').select('id,name,slug,phone,created_by').eq('slug', slug).maybeSingle();
+  const { data: shop, error } = await db.from('barbershops').select('id,name,slug,phone,created_by,prepayment_enabled,prepayment_percent,pix_key,pix_holder_name').eq('slug', slug).maybeSingle();
   if (error) throw error;
   if (!shop) throw Object.assign(new Error('Barbearia não encontrada.'), { status: 404 });
-  const [servicesResult, professionalsResult] = await Promise.all([
+  const [servicesResult, professionalsResult, hoursResult] = await Promise.all([
     db.from('services').select('id,name,duration_minutes,price_cents').eq('barbershop_id', shop.id).eq('active', true).order('name'),
-    db.from('professionals').select('id,name').eq('barbershop_id', shop.id).eq('active', true).order('name')
+    db.from('professionals').select('id,name').eq('barbershop_id', shop.id).eq('active', true).order('name'),
+    getBusinessHoursForShop(db, shop.id).then(data => ({ data })).catch(error => ({ error }))
   ]);
   if (servicesResult.error) throw servicesResult.error;
   if (professionalsResult.error) throw professionalsResult.error;
-  return { shop: { id: shop.id, name: shop.name, slug: shop.slug, phone: shop.phone }, services: servicesResult.data || [], professionals: professionalsResult.data || [] };
+  if (hoursResult.error) throw hoursResult.error;
+  return {
+    shop: {
+      id: shop.id,
+      name: shop.name,
+      slug: shop.slug,
+      phone: shop.phone,
+      prepayment: {
+        enabled: Boolean(shop.prepayment_enabled && shop.pix_key),
+        percent: shop.prepayment_percent || 50,
+        pixKey: shop.pix_key || '',
+        pixHolderName: shop.pix_holder_name || ''
+      }
+    },
+    services: servicesResult.data || [],
+    businessHours: hoursResult.data || [],
+    professionals: professionalsResult.data || []
+  };
 }
 
 async function validateCouponForShop(db, shopId, code, priceCents) {
@@ -41,8 +73,11 @@ async function validateCoupon(slug, input) {
 async function createBooking(slug, input) {
   const required = ['name', 'phone', 'serviceId', 'startsAt'];
   if (required.some(key => typeof input[key] !== 'string' || !input[key].trim())) throw Object.assign(new Error('Preencha os dados obrigatórios.'), { status: 400 });
+  const clientName = normalizeName(input.name);
+  const phone = normalizePhone(input.phone);
+  assertClientData(clientName, phone);
   const db = getSupabaseClient();
-  const { data: shop, error: shopError } = await db.from('barbershops').select('id,created_by').eq('slug', slug).maybeSingle();
+  const { data: shop, error: shopError } = await db.from('barbershops').select('id,created_by,prepayment_enabled,prepayment_percent,pix_key,pix_holder_name').eq('slug', slug).maybeSingle();
   if (shopError) throw shopError;
   if (!shop) throw Object.assign(new Error('Barbearia não encontrada.'), { status: 404 });
   const startsAt = new Date(input.startsAt);
@@ -55,18 +90,22 @@ async function createBooking(slug, input) {
   if (serviceResult.error || !serviceResult.data) throw Object.assign(new Error('Serviço indisponível.'), { status: 400 });
   if (professionalResult.error || (input.professionalId && !professionalResult.data)) throw Object.assign(new Error('Profissional indisponível.'), { status: 400 });
   const professionalId = professionalResult.data?.id || null;
+  await assertWithinBusinessHours(db, { barbershopId: shop.id, startsAt, durationMinutes: serviceResult.data.duration_minutes });
   await assertNoAppointmentConflict(db, { barbershopId: shop.id, professionalId, startsAt, durationMinutes: serviceResult.data.duration_minutes });
-  const phone = input.phone.trim().slice(0, 30);
   let { data: client, error: clientError } = await db.from('clients').select('id').eq('barbershop_id', shop.id).eq('phone', phone).maybeSingle();
   if (clientError) throw clientError;
   if (!client) {
-    const created = await db.from('clients').insert({ barbershop_id: shop.id, name: input.name.trim().slice(0, 100), phone }).select('id').single();
+    const created = await db.from('clients').insert({ barbershop_id: shop.id, name: clientName, phone }).select('id').single();
     if (created.error) throw created.error; client = created.data;
   }
   const service = serviceResult.data;
   const couponResult = await validateCouponForShop(db, shop.id, input.couponCode, service.price_cents);
   const notes = typeof input.notes === 'string' ? input.notes.trim().slice(0, 1000) : null;
-  const { data, error } = await db.from('appointments').insert({ barbershop_id: shop.id, client_id: client.id, service_id: service.id, professional_id: professionalId, starts_at: startsAt.toISOString(), duration_minutes: service.duration_minutes, original_price_cents: service.price_cents, discount_cents: couponResult.discountCents, price_cents: couponResult.finalPriceCents, coupon_id: couponResult.coupon?.id || null, notes, status: 'confirmed', created_by: shop.created_by }).select('id,starts_at').single();
+  const prepaymentEnabled = Boolean(shop.prepayment_enabled && shop.pix_key);
+  const prepaymentCents = prepaymentEnabled ? Math.max(1, Math.round(couponResult.finalPriceCents * (shop.prepayment_percent || 50) / 100)) : 0;
+  const status = prepaymentEnabled ? 'pending' : 'confirmed';
+  const paymentStatus = prepaymentEnabled ? 'awaiting_manual_confirmation' : 'not_required';
+  const { data, error } = await db.from('appointments').insert({ barbershop_id: shop.id, client_id: client.id, service_id: service.id, professional_id: professionalId, starts_at: startsAt.toISOString(), duration_minutes: service.duration_minutes, original_price_cents: service.price_cents, discount_cents: couponResult.discountCents, price_cents: couponResult.finalPriceCents, coupon_id: couponResult.coupon?.id || null, notes, status, prepayment_required: prepaymentEnabled, prepayment_cents: prepaymentCents, payment_status: paymentStatus, created_by: shop.created_by }).select('id,starts_at,status,prepayment_cents,payment_status').single();
   if (error) throw translateAppointmentConflict(error);
   if (couponResult.coupon) await db.from('coupons').update({ uses_count: couponResult.coupon.uses_count + 1 }).eq('id', couponResult.coupon.id);
   return data;

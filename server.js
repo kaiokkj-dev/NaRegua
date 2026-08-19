@@ -86,6 +86,10 @@ app.get('/cupons', requirePageAuth, (_request, response) => {
   response.sendFile(path.join(publicPath, 'pages', 'cupons.html'));
 });
 
+app.get('/configuracoes', requirePageAuth, (_request, response) => {
+  response.sendFile(path.join(publicPath, 'pages', 'configuracoes.html'));
+});
+
 app.get('/reservas', requirePageAuth, (_request, response) => {
   response.sendFile(path.join(publicPath, 'pages', 'reservas.html'));
 });

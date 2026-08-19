@@ -19,5 +19,9 @@ router.get('/coupons', controller.coupons);
 router.post('/coupons', controller.createCoupon);
 router.patch('/coupons/:id', controller.updateCoupon);
 router.delete('/coupons/:id', controller.deleteCoupon);
+router.get('/settings/payment', controller.paymentSettings);
+router.patch('/settings/payment', controller.updatePaymentSettings);
+router.get('/settings/hours', controller.hoursSettings);
+router.patch('/settings/hours', controller.updateHoursSettings);
 
 module.exports = router;

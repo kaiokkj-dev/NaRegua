@@ -1,7 +1,21 @@
 const { getSupabaseClient } = require('../config/supabase');
 const { assertNoAppointmentConflict, translateAppointmentConflict } = require('./appointment-conflict.service');
+const { getBusinessHoursForShop, updateBusinessHoursForShop, assertWithinBusinessHours } = require('./business-hours.service');
 const shopCache = new Map();
 const SHOP_CACHE_TTL = 5 * 60 * 1000;
+
+function normalizeName(value) {
+  return String(value || '').trim().replace(/\s+/g, ' ').slice(0, 100);
+}
+
+function normalizePhone(value) {
+  return String(value || '').replace(/\D/g, '').slice(0, 13);
+}
+
+function assertClientData(name, phone) {
+  if (name.length < 2 || !/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(name) || /\d/.test(name)) throw Object.assign(new Error('Informe um nome válido, sem números.'), { status: 400 });
+  if (phone.length < 10 || phone.length > 13) throw Object.assign(new Error('Informe um WhatsApp válido com DDD.'), { status: 400 });
+}
 
 async function getShop(userId) {
   const cached = shopCache.get(userId);
@@ -52,7 +66,9 @@ async function createAppointment(userId, input) {
   const priceCents = Math.max(0, Math.round((Number(input.price) || 0) * 100));
   const db = getSupabaseClient();
   const shopId = await getShop(userId);
-  const phone = input.phone.trim().slice(0, 30);
+  const clientName = normalizeName(input.clientName);
+  const phone = normalizePhone(input.phone);
+  assertClientData(clientName, phone);
 
   const serviceName = input.serviceName.trim().slice(0, 100);
   const [clientLookup, serviceLookup] = await Promise.all([
@@ -65,7 +81,7 @@ async function createAppointment(userId, input) {
   let service = serviceLookup.data;
   const creations = [];
   if (!client) {
-    creations.push(db.from('clients').insert({ barbershop_id: shopId, name: input.clientName.trim().slice(0, 100), phone }).select('id').single().then(result => {
+    creations.push(db.from('clients').insert({ barbershop_id: shopId, name: clientName, phone }).select('id').single().then(result => {
       if (result.error) throw result.error; client = result.data;
     }));
   }
@@ -83,6 +99,7 @@ async function createAppointment(userId, input) {
     professionalId = professional.id;
   }
   if (startsAt <= new Date()) throw Object.assign(new Error('Escolha um horário futuro.'), { status: 400 });
+  await assertWithinBusinessHours(db, { barbershopId: shopId, startsAt, durationMinutes: duration });
   await assertNoAppointmentConflict(db, { barbershopId: shopId, professionalId, startsAt, durationMinutes: duration });
   const { data, error } = await db.from('appointments').insert({ barbershop_id: shopId, client_id: client.id, service_id: service.id, professional_id: professionalId, starts_at: startsAt.toISOString(), duration_minutes: duration, price_cents: priceCents, status: 'confirmed', created_by: userId }).select('id').single();
   if (error) throw translateAppointmentConflict(error);
@@ -112,10 +129,12 @@ async function listClients(userId, search = '') {
 }
 
 async function createClient(userId, input) {
-  if (typeof input.name !== 'string' || input.name.trim().length < 2 || typeof input.phone !== 'string' || !input.phone.trim()) throw Object.assign(new Error('Informe nome e telefone.'), { status: 400 });
+  const name = normalizeName(input.name);
+  const phone = normalizePhone(input.phone);
+  assertClientData(name, phone);
   const db = getSupabaseClient();
   const shopId = await getShop(userId);
-  const { data, error } = await db.from('clients').insert({ barbershop_id: shopId, name: input.name.trim().slice(0, 100), phone: input.phone.trim().slice(0, 30) }).select('id,name,phone,created_at').single();
+  const { data, error } = await db.from('clients').insert({ barbershop_id: shopId, name, phone }).select('id,name,phone,created_at').single();
   if (error?.code === '23505') throw Object.assign(new Error('Este telefone já está cadastrado.'), { status: 409 });
   if (error) throw error;
   return data;
@@ -257,4 +276,58 @@ async function deleteCoupon(userId, couponId) {
   if (!data) throw Object.assign(new Error('Cupom não encontrado.'), { status: 404 });
 }
 
-module.exports = { dashboard, createAppointment, updateAppointmentStatus, listClients, createClient, listServices, createService, updateService, listProfessionals, createProfessional, updateProfessional, listReservations, listCoupons, createCoupon, updateCoupon, deleteCoupon };
+async function getPaymentSettings(userId) {
+  const db = getSupabaseClient();
+  const shopId = await getShop(userId);
+  const { data, error } = await db.from('barbershops')
+    .select('prepayment_enabled,prepayment_percent,pix_key,pix_holder_name')
+    .eq('id', shopId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) throw Object.assign(new Error('Barbearia não encontrada.'), { status: 404 });
+  return {
+    enabled: Boolean(data.prepayment_enabled),
+    percent: data.prepayment_percent || 50,
+    pixKey: data.pix_key || '',
+    pixHolderName: data.pix_holder_name || ''
+  };
+}
+
+async function updatePaymentSettings(userId, input) {
+  const db = getSupabaseClient();
+  const shopId = await getShop(userId);
+  const percent = Math.round(Number(input.percent) || 50);
+  const pixKey = String(input.pixKey || '').trim().slice(0, 180);
+  const pixHolderName = String(input.pixHolderName || '').trim().slice(0, 100);
+  const enabled = Boolean(input.enabled);
+  if (enabled && !pixKey) throw Object.assign(new Error('Informe a chave Pix para ativar o pagamento antecipado.'), { status: 400 });
+  if (percent < 1 || percent > 100) throw Object.assign(new Error('O percentual do sinal precisa ficar entre 1% e 100%.'), { status: 400 });
+  const { data, error } = await db.from('barbershops')
+    .update({
+      prepayment_enabled: enabled,
+      prepayment_percent: percent,
+      pix_key: pixKey || null,
+      pix_holder_name: pixHolderName || null,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', shopId)
+    .select('prepayment_enabled,prepayment_percent,pix_key,pix_holder_name')
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) throw Object.assign(new Error('Barbearia não encontrada.'), { status: 404 });
+  return getPaymentSettings(userId);
+}
+
+async function getHoursSettings(userId) {
+  const db = getSupabaseClient();
+  const shopId = await getShop(userId);
+  return getBusinessHoursForShop(db, shopId);
+}
+
+async function updateHoursSettings(userId, input) {
+  const db = getSupabaseClient();
+  const shopId = await getShop(userId);
+  return updateBusinessHoursForShop(db, shopId, input.days);
+}
+
+module.exports = { dashboard, createAppointment, updateAppointmentStatus, listClients, createClient, listServices, createService, updateService, listProfessionals, createProfessional, updateProfessional, listReservations, listCoupons, createCoupon, updateCoupon, deleteCoupon, getPaymentSettings, updatePaymentSettings, getHoursSettings, updateHoursSettings };

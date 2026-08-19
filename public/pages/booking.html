@@ -29,14 +29,20 @@
     <section class="details-screen" data-details-screen hidden>
       <div class="schedule-head"><button type="button" data-details-back>←</button><div><strong>Seus dados</strong><small>Última etapa</small></div><span>Passo 2 de 2</span></div>
       <div class="booking-review" data-booking-review></div>
+      <section class="payment-box" data-payment-box hidden>
+        <div><small>Pagamento antecipado</small><strong data-payment-amount>R$ 0,00</strong></div>
+        <p>Faça o Pix do sinal para reservar o horário. A barbearia confirma assim que conferir o pagamento.</p>
+        <button type="button" data-copy-pix>Copiar chave Pix</button>
+        <span data-pix-key></span>
+      </section>
       <div class="booking-extras">
         <details><summary><svg viewBox="0 0 24 24"><path d="M20 13 12 21 3 12V4h8z"/><circle cx="8" cy="8" r="1"/></svg><span>Tenho um cupom</span><b>⌄</b></summary><div class="coupon-entry"><input data-coupon-code maxlength="24" placeholder="Digite o código"><button type="button" data-apply-coupon>Aplicar</button></div><p data-coupon-message></p></details>
         <details><summary><svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/><path d="M8 10h8M12 7v6"/></svg><span>Adicionar uma observação</span><b>⌄</b></summary><textarea data-booking-notes maxlength="1000" placeholder="Ex.: Tenho sensibilidade na pele, gostaria de um corte específico..."></textarea></details>
       </div>
-      <form data-booking-form><label>Como podemos chamar você?<input name="name" required maxlength="100" placeholder="Seu nome"></label><label>WhatsApp com DDD<input name="phone" required maxlength="30" placeholder="(11) 99999-9999"></label><p data-booking-error></p><button type="submit">Confirmar agendamento →</button></form>
+      <form data-booking-form><label>Como podemos chamar você?<input name="name" required maxlength="100" placeholder="Seu nome"></label><label>WhatsApp com DDD<input name="phone" required maxlength="30" placeholder="(11) 99999-9999"></label><label class="payment-check" data-payment-check hidden><input type="checkbox" name="paidSignal"> Já fiz o Pix do sinal</label><p data-booking-error></p><button type="submit">Confirmar agendamento →</button></form>
     </section>
 
-    <section class="booking-success" data-booking-success hidden><span>✓</span><h2>Horário confirmado!</h2><p>Seu atendimento já entrou na agenda da barbearia.</p><button type="button" data-book-again>Voltar ao início</button></section>
+    <section class="booking-success" data-booking-success hidden><span>✓</span><h2 data-success-title>Horário confirmado!</h2><p data-success-message>Seu atendimento já entrou na agenda da barbearia.</p><button type="button" data-book-again>Voltar ao início</button></section>
     <footer class="booking-nav"><button class="active"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 10 8-6 8 6v9a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z"/></svg><span>Início</span></button><button><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M8 15h3M13 15h3"/></svg><span>Agendamentos</span></button><button><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg><span>Perfil</span></button></footer>
   </main>
   <script type="module" src="/js/booking.js"></script>

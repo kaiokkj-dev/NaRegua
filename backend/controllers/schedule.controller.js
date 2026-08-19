@@ -80,4 +80,24 @@ async function deleteCoupon(request, response, next) {
   catch (error) { return next(error); }
 }
 
-module.exports = { dashboard, create, updateStatus, clients, createClient, services, createService, updateService, professionals, createProfessional, updateProfessional, reservations, coupons, createCoupon, updateCoupon, deleteCoupon };
+async function paymentSettings(request, response, next) {
+  try { return response.json(await schedule.getPaymentSettings(request.user.sub)); }
+  catch (error) { return next(error); }
+}
+
+async function updatePaymentSettings(request, response, next) {
+  try { return response.json(await schedule.updatePaymentSettings(request.user.sub, request.body)); }
+  catch (error) { return next(error); }
+}
+
+async function hoursSettings(request, response, next) {
+  try { return response.json(await schedule.getHoursSettings(request.user.sub)); }
+  catch (error) { return next(error); }
+}
+
+async function updateHoursSettings(request, response, next) {
+  try { return response.json(await schedule.updateHoursSettings(request.user.sub, request.body)); }
+  catch (error) { return next(error); }
+}
+
+module.exports = { dashboard, create, updateStatus, clients, createClient, services, createService, updateService, professionals, createProfessional, updateProfessional, reservations, coupons, createCoupon, updateCoupon, deleteCoupon, paymentSettings, updatePaymentSettings, hoursSettings, updateHoursSettings };
