@@ -36,6 +36,10 @@ function timeToMinutes(value) {
   return hours * 60 + minutes;
 }
 
+function closingTimeToMinutes(value) {
+  return String(value || '').slice(0, 5) === '00:00' ? 24 * 60 : timeToMinutes(value);
+}
+
 function minutesToTime(value) {
   const hours = String(Math.floor(value / 60)).padStart(2, '0');
   const minutes = String(value % 60).padStart(2, '0');
@@ -124,7 +128,7 @@ function renderTimes() {
     return;
   }
   const open = timeToMinutes(hours.opensAt);
-  const close = timeToMinutes(hours.closesAt);
+  const close = closingTimeToMinutes(hours.closesAt);
   const interval = Math.max(5, Number(hours.slotIntervalMinutes) || 30);
   const duration = Math.max(5, Number(service.duration_minutes) || 30);
   const now = new Date();

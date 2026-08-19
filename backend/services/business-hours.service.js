@@ -14,6 +14,10 @@ function timeToMinutes(value) {
   return hours * 60 + minutes;
 }
 
+function closingTimeToMinutes(value) {
+  return trimTime(value) === '00:00' ? 24 * 60 : timeToMinutes(value);
+}
+
 function defaultBusinessHours(shopId) {
   return Array.from({ length: 7 }, (_, weekday) => ({
     barbershop_id: shopId,
@@ -49,7 +53,7 @@ function validateDay(input, shopId) {
   const breakStartsAt = trimTime(input.breakStartsAt || input.break_starts_at || '12:00');
   const breakEndsAt = trimTime(input.breakEndsAt || input.break_ends_at || '13:00');
   const openMinutes = timeToMinutes(opensAt);
-  const closeMinutes = timeToMinutes(closesAt);
+  const closeMinutes = closingTimeToMinutes(closesAt);
   const breakStartMinutes = timeToMinutes(breakStartsAt);
   const breakEndMinutes = timeToMinutes(breakEndsAt);
   const slotInterval = Math.round(Number(input.slotIntervalMinutes || input.slot_interval_minutes || 30));
@@ -125,7 +129,7 @@ async function assertWithinBusinessHours(db, { barbershopId, startsAt, durationM
   const startMinutes = local.minutes;
   const endMinutes = startMinutes + Math.round(Number(durationMinutes) || 30);
   const openMinutes = timeToMinutes(day.opensAt);
-  const closeMinutes = timeToMinutes(day.closesAt);
+  const closeMinutes = closingTimeToMinutes(day.closesAt);
   if (startMinutes < openMinutes || endMinutes > closeMinutes) {
     throw Object.assign(new Error('Este serviço não cabe dentro do horário de funcionamento.'), { status: 400 });
   }

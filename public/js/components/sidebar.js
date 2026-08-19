@@ -74,6 +74,7 @@ function closeFloatingMenus(except) {
   document.querySelectorAll('[data-shop-menu-trigger],[data-notification-trigger],[data-user-menu-trigger]').forEach(trigger => {
     if (trigger.getAttribute('aria-controls') !== except?.id) trigger.setAttribute('aria-expanded', 'false');
   });
+  updateFloatingMenuState();
 }
 
 function toggleMenu(trigger, menu) {
@@ -81,6 +82,12 @@ function toggleMenu(trigger, menu) {
   closeFloatingMenus(menu);
   menu.hidden = !willOpen;
   trigger.setAttribute('aria-expanded', String(willOpen));
+  updateFloatingMenuState();
+}
+
+function updateFloatingMenuState() {
+  const hasOpenMenu = Boolean(document.querySelector('[data-shop-menu]:not([hidden]),[data-notification-menu]:not([hidden]),[data-user-menu]:not([hidden])'));
+  document.body.classList.toggle('floating-menu-open', hasOpenMenu);
 }
 
 function initDashboardChrome() {
