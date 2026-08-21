@@ -94,6 +94,10 @@ app.get('/reservas', requirePageAuth, (_request, response) => {
   response.sendFile(path.join(publicPath, 'pages', 'reservas.html'));
 });
 
+app.get('/assinatura', requirePageAuth, (_request, response) => {
+  response.sendFile(path.join(publicPath, 'pages', 'assinatura.html'));
+});
+
 app.get('/agendar/:slug', (_request, response) => {
   response.sendFile(path.join(publicPath, 'pages', 'booking.html'));
 });

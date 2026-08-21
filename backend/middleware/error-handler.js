@@ -9,8 +9,9 @@ function notFound(request, response, next) {
 function errorHandler(error, _request, response, _next) {
   console.error(error);
   const status = error.status || error.statusCode || 500;
+  const isDevelopment = process.env.NODE_ENV !== 'production';
   response.status(status).json({
-    error: status < 500 ? error.message : 'Ocorreu um erro interno.'
+    error: status < 500 || isDevelopment ? error.message : 'Ocorreu um erro interno.'
   });
 }
 

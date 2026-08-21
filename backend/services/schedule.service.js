@@ -1,6 +1,7 @@
 const { getSupabaseClient } = require('../config/supabase');
 const { assertNoAppointmentConflict, translateAppointmentConflict } = require('./appointment-conflict.service');
 const { getBusinessHoursForShop, updateBusinessHoursForShop, assertWithinBusinessHours } = require('./business-hours.service');
+const subscriptions = require('./subscription.service');
 const shopCache = new Map();
 const SHOP_CACHE_TTL = 5 * 60 * 1000;
 
@@ -66,6 +67,7 @@ async function createAppointment(userId, input) {
   const priceCents = Math.max(0, Math.round((Number(input.price) || 0) * 100));
   const db = getSupabaseClient();
   const shopId = await getShop(userId);
+  await subscriptions.assertAppointmentCapacity(db, shopId);
   const clientName = normalizeName(input.clientName);
   const phone = normalizePhone(input.phone);
   assertClientData(clientName, phone);
@@ -188,6 +190,7 @@ async function createProfessional(userId, input) {
   if (typeof input.name !== 'string' || input.name.trim().length < 2) throw Object.assign(new Error('Informe o nome do profissional.'), { status: 400 });
   const db = getSupabaseClient();
   const shopId = await getShop(userId);
+  await subscriptions.assertProfessionalCapacity(db, shopId);
   const { data, error } = await db.from('professionals').insert({ barbershop_id: shopId, name: input.name.trim().slice(0, 100) }).select('id,name,active,created_at').single();
   if (error) throw error;
   return { ...data, appointments: [] };
@@ -203,6 +206,11 @@ async function updateProfessional(userId, professionalId, input) {
   if (!Object.keys(updates).length) throw Object.assign(new Error('Nenhuma alteração enviada.'), { status: 400 });
   const db = getSupabaseClient();
   const shopId = await getShop(userId);
+  if (updates.active) {
+    const { data: existing, error: existingError } = await db.from('professionals').select('active').eq('id', professionalId).eq('barbershop_id', shopId).maybeSingle();
+    if (existingError) throw existingError;
+    if (existing && !existing.active) await subscriptions.assertProfessionalCapacity(db, shopId);
+  }
   const { data, error } = await db.from('professionals').update(updates).eq('id', professionalId).eq('barbershop_id', shopId).select('id,name,active,created_at').maybeSingle();
   if (error) throw error;
   if (!data) throw Object.assign(new Error('Profissional não encontrado.'), { status: 404 });
@@ -251,6 +259,7 @@ function couponPayload(input) {
 async function createCoupon(userId, input) {
   const db = getSupabaseClient();
   const shopId = await getShop(userId);
+  await subscriptions.assertFeature(db, shopId, 'coupons', 'Cupons estão disponíveis a partir do plano Pro.');
   const { data, error } = await db.from('coupons').insert({ barbershop_id: shopId, ...couponPayload(input) }).select('id,code,discount_type,discount_value,min_order_cents,max_uses,uses_count,starts_at,ends_at,active,created_at').single();
   if (error?.code === '23505') throw Object.assign(new Error('Já existe um cupom com este código.'), { status: 409 });
   if (error) throw error;
@@ -296,6 +305,7 @@ async function getPaymentSettings(userId) {
 async function updatePaymentSettings(userId, input) {
   const db = getSupabaseClient();
   const shopId = await getShop(userId);
+  if (input.enabled) await subscriptions.assertFeature(db, shopId, 'prepayment', 'O sinal antecipado por Pix está disponível a partir do plano Pro.');
   const percent = Math.round(Number(input.percent) || 50);
   const pixKey = String(input.pixKey || '').trim().slice(0, 180);
   const pixHolderName = String(input.pixHolderName || '').trim().slice(0, 100);

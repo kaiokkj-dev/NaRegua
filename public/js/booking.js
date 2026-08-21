@@ -21,6 +21,7 @@ let couponCode = '';
 let finalPriceCents = 0;
 let verificationToken = '';
 let verificationPhone = '';
+let availabilityRequest = 0;
 
 async function api(path, options = {}) {
   const response = await fetch(path, { cache: 'no-store', ...options, headers: { 'Content-Type': 'application/json', ...(options.headers || {}) } });
@@ -142,23 +143,34 @@ function renderDays() {
   daysTarget.innerHTML = days.join('');
 }
 
-function renderTimes() {
+async function renderTimes() {
+  const requestId = ++availabilityRequest;
   const hours = selectedBusinessHours();
+  const intervalLabel = document.querySelector('[data-interval-label]');
   if (hours.closed) {
+    intervalLabel.textContent = '';
     timesTarget.innerHTML = '<small>A barbearia nao abre neste dia.</small>';
     updateContinue();
     return;
   }
-  const open = timeToMinutes(hours.opensAt);
-  const close = normalizeCloseMinutes(open, closingTimeToMinutes(hours.closesAt));
-  const interval = Math.max(5, Number(hours.slotIntervalMinutes) || 30);
-  const duration = Math.max(5, Number(service.duration_minutes) || 30);
-  const now = new Date();
-  const slots = [];
-  for (let minute = open; minute + duration <= close; minute += interval) {
-    if (!slotOverlapsBreak(minute, minute + duration, hours)) slots.push(minute);
+  timesTarget.innerHTML = '<small>Carregando horários...</small>';
+  updateContinue();
+  let availability;
+  try {
+    const query = new URLSearchParams({ date: selectedDate, serviceId: service.id });
+    if (professionalId) query.set('professionalId', professionalId);
+    availability = await api(`/api/public/shops/${encodeURIComponent(slug)}/availability?${query}`);
+  } catch (error) {
+    if (requestId !== availabilityRequest) return;
+    timesTarget.innerHTML = `<small>${escapeHtml(error.message)}</small>`;
+    intervalLabel.textContent = '';
+    return;
   }
-  const breakStart = normalizePeriodMinute(timeToMinutes(hours.breakStartsAt || '12:00'), open);
+  if (requestId !== availabilityRequest) return;
+  const interval = Math.max(5, Number(availability.intervalMinutes) || 30);
+  intervalLabel.textContent = `intervalos de ${interval} min`;
+  const slots = (availability.slots || []).map(item => Number(item.minute));
+  if (!slots.includes(Number(selectedTime))) selectedTime = '';
   const groups = [
     ['Madrugada', slots.filter(minute => minute >= 24 * 60)],
     ['Manha', slots.filter(minute => minute < 12 * 60)],
@@ -166,8 +178,7 @@ function renderTimes() {
     ['Noite', slots.filter(minute => minute >= 18 * 60 && minute < 24 * 60)]
   ];
   timesTarget.innerHTML = groups.map(([label, times]) => {
-    const valid = times.filter(minute => slotDateTime(selectedDate, minute) > now);
-    return valid.length ? `<div class="time-group"><small>${label} (${valid.length})</small><div class="time-grid">${valid.map(minute => `<button type="button" class="${Number(selectedTime) === minute ? 'selected' : ''}" data-time="${minute}">${minutesToTime(minute)}</button>`).join('')}</div></div>` : '';
+    return times.length ? `<div class="time-group"><small>${label} (${times.length})</small><div class="time-grid">${times.map(minute => `<button type="button" class="${Number(selectedTime) === minute ? 'selected' : ''}" data-time="${minute}">${minutesToTime(minute)}</button>`).join('')}</div></div>` : '';
   }).join('') || '<small>Nenhum horario disponivel para a duracao deste servico.</small>';
   updateContinue();
 }
@@ -229,7 +240,9 @@ professionalPicker.addEventListener('click', event => {
   const button = event.target.closest('[data-pick-professional]');
   if (!button) return;
   professionalId = button.dataset.pickProfessional;
+  selectedTime = '';
   renderProfessionals();
+  renderTimes();
 });
 
 daysTarget.addEventListener('click', event => {
@@ -245,7 +258,8 @@ timesTarget.addEventListener('click', event => {
   const button = event.target.closest('[data-time]');
   if (!button) return;
   selectedTime = button.dataset.time;
-  renderTimes();
+  timesTarget.querySelectorAll('[data-time]').forEach(item => item.classList.toggle('selected', item === button));
+  updateContinue();
 });
 
 document.querySelector('[data-back]').addEventListener('click', () => show(catalogScreen));

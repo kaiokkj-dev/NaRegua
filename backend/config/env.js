@@ -21,7 +21,10 @@ const env = {
   whatsappLanguage: process.env.WHATSAPP_LANGUAGE || 'pt_BR',
   emailNotificationsEnabled: String(process.env.EMAIL_NOTIFICATIONS_ENABLED || '').toLowerCase() === 'true',
   resendApiKey: process.env.RESEND_API_KEY || '',
-  emailFrom: process.env.EMAIL_FROM || 'NaRégua <onboarding@resend.dev>'
+  emailFrom: process.env.EMAIL_FROM || 'NaRégua <onboarding@resend.dev>',
+  mercadoPagoAccessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN || '',
+  mercadoPagoBackUrl: process.env.MERCADO_PAGO_BACK_URL || '',
+  mercadoPagoWebhookSecret: process.env.MERCADO_PAGO_WEBHOOK_SECRET || ''
 };
 
 env.isProduction = env.nodeEnv === 'production';
