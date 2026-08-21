@@ -9,6 +9,23 @@ const hoursForm = document.querySelector('[data-hours-settings-form]');
 const hoursTarget = document.querySelector('[data-business-hours]');
 const hoursErrorTarget = document.querySelector('[data-hours-error]');
 const weekDays = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+const timeInputAttrs = 'type="text" inputmode="numeric" autocomplete="off" maxlength="5" pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$" placeholder="HH:MM" class="time-24"';
+
+function normalizeTime(value) {
+  const digits = String(value || '').replace(/\D/g, '').slice(0, 4);
+  if (!digits) return '';
+  if (digits.length <= 2) return digits.padStart(2, '0') + ':00';
+  const hours = Number(digits.slice(0, -2));
+  const minutes = Number(digits.slice(-2));
+  if (hours > 23 || minutes > 59) return '';
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+}
+
+function maskTime(value) {
+  const digits = String(value || '').replace(/\D/g, '').slice(0, 4);
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+}
 
 async function api(path, options = {}) {
   const response = await fetch(path, { credentials: 'same-origin', ...options, headers: { 'Content-Type': 'application/json', ...(options.headers || {}) } });
@@ -51,21 +68,31 @@ function renderHours(days) {
         </label>
       </div>
       <div class="hours-fields">
-        <label>Abre<input name="opensAt" type="time" value="${day.opensAt || '08:00'}"></label>
-        <label>Fecha<input name="closesAt" type="time" value="${day.closesAt || '18:00'}"></label>
+        <label>Abre <small>24h</small><input name="opensAt" ${timeInputAttrs} value="${day.opensAt || '08:00'}"></label>
+        <label>Fecha <small>24h</small><input name="closesAt" ${timeInputAttrs} value="${day.closesAt || '18:00'}"></label>
         <label>Intervalo<input name="slotIntervalMinutes" type="number" min="5" max="120" step="5" value="${day.slotIntervalMinutes || 30}"></label>
       </div>
       <div class="hours-break">
         <label class="settings-toggle compact">
           <input type="checkbox" name="breakEnabled" ${day.breakEnabled ? 'checked' : ''}>
           <span></span>
-          <b>Almoço</b>
+          <b data-break-label>${day.breakEnabled ? 'Pausa ativa' : 'Sem pausa'}</b>
         </label>
-        <label>De<input name="breakStartsAt" type="time" value="${day.breakStartsAt || '12:00'}"></label>
-        <label>Até<input name="breakEndsAt" type="time" value="${day.breakEndsAt || '13:00'}"></label>
+        <label data-break-field>De <small>24h</small><input name="breakStartsAt" ${timeInputAttrs} value="${day.breakStartsAt || '12:00'}"></label>
+        <label data-break-field>Até <small>24h</small><input name="breakEndsAt" ${timeInputAttrs} value="${day.breakEndsAt || '13:00'}"></label>
       </div>
     </article>
   `).join('');
+  hoursTarget.querySelectorAll('[data-weekday]').forEach(syncBreakState);
+}
+
+function syncBreakState(row) {
+  const enabled = row.querySelector('[name="breakEnabled"]').checked;
+  row.querySelector('[data-break-label]').textContent = enabled ? 'Pausa ativa' : 'Sem pausa';
+  row.querySelectorAll('[data-break-field]').forEach(field => {
+    field.classList.toggle('is-disabled', !enabled);
+    field.querySelector('input').disabled = !enabled;
+  });
 }
 
 async function loadHours() {
@@ -104,6 +131,11 @@ hoursForm.addEventListener('submit', async event => {
   hoursErrorTarget.textContent = '';
   const button = hoursForm.querySelector('[type="submit"]');
   const label = button.textContent;
+  hoursTarget.querySelectorAll('.time-24').forEach(input => { input.value = normalizeTime(input.value); });
+  if ([...hoursTarget.querySelectorAll('.time-24')].some(input => !input.value)) {
+    hoursErrorTarget.textContent = 'Use horários no formato brasileiro, exemplo: 08:00, 12:00 ou 20:00.';
+    return;
+  }
   const days = [...hoursTarget.querySelectorAll('[data-weekday]')].map(row => ({
     weekday: Number(row.dataset.weekday),
     closed: row.querySelector('[name="closed"]').checked,
@@ -126,6 +158,21 @@ hoursForm.addEventListener('submit', async event => {
     button.textContent = label;
   }
 });
+
+hoursTarget.addEventListener('input', event => {
+  if (!event.target.matches('.time-24')) return;
+  event.target.value = maskTime(event.target.value);
+});
+
+hoursTarget.addEventListener('change', event => {
+  if (!event.target.matches('[name="breakEnabled"]')) return;
+  syncBreakState(event.target.closest('[data-weekday]'));
+});
+
+hoursTarget.addEventListener('blur', event => {
+  if (!event.target.matches('.time-24')) return;
+  event.target.value = normalizeTime(event.target.value);
+}, true);
 
 (async () => {
   try {

@@ -1,0 +1,14 @@
+.phone-verification{display:grid;gap:10px;padding:13px;border:1px solid #665316;border-radius:8px;background:#1b190f}
+.phone-verification[hidden]{display:none}
+.phone-verification strong,.phone-verification small{display:block}
+.phone-verification strong{color:#fff;font-size:13px}
+.phone-verification small{margin-top:4px;color:#b9ad83;font-size:10px;line-height:1.4}
+.verification-entry{display:grid;grid-template-columns:1fr auto;gap:8px}
+.verification-entry input{height:45px!important;text-align:center;font-size:18px!important;font-weight:700;letter-spacing:5px;font-variant-numeric:tabular-nums}
+.verification-entry button,.verification-resend{border:0;border-radius:6px;font-weight:700;cursor:pointer}
+.verification-entry button{padding:0 15px;background:#ffc400;color:#111}
+.verification-resend{justify-self:start;padding:3px 0;background:transparent;color:#d7bd4b;font-size:10px}
+.phone-verification.is-verified{border-color:#245b43;background:#111c17}
+.phone-verification.is-verified .verification-entry,.phone-verification.is-verified .verification-resend{display:none}
+.phone-verification.is-verified small{color:#69d59a}
+@media(max-width:380px){.verification-entry{grid-template-columns:1fr}.verification-entry button{height:42px}}

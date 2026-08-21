@@ -18,6 +18,26 @@ function closingTimeToMinutes(value) {
   return trimTime(value) === '00:00' ? 24 * 60 : timeToMinutes(value);
 }
 
+function previousWeekday(weekday) {
+  return weekday === 0 ? 6 : weekday - 1;
+}
+
+function normalizeCloseMinutes(openMinutes, closeMinutes) {
+  return closeMinutes <= openMinutes ? closeMinutes + 24 * 60 : closeMinutes;
+}
+
+function normalizePeriodMinute(minutes, openMinutes) {
+  return minutes < openMinutes ? minutes + 24 * 60 : minutes;
+}
+
+function validateBreakInsidePeriod({ openMinutes, closeMinutes, breakStartMinutes, breakEndMinutes }) {
+  const normalizedClose = normalizeCloseMinutes(openMinutes, closeMinutes);
+  const normalizedBreakStart = normalizePeriodMinute(breakStartMinutes, openMinutes);
+  let normalizedBreakEnd = normalizePeriodMinute(breakEndMinutes, openMinutes);
+  if (normalizedBreakEnd <= normalizedBreakStart) normalizedBreakEnd += 24 * 60;
+  return normalizedBreakStart > openMinutes && normalizedBreakEnd < normalizedClose;
+}
+
 function defaultBusinessHours(shopId) {
   return Array.from({ length: 7 }, (_, weekday) => ({
     barbershop_id: shopId,
@@ -60,8 +80,8 @@ function validateDay(input, shopId) {
   const breakEnabled = Boolean(input.breakEnabled ?? input.break_enabled);
 
   if ([openMinutes, closeMinutes, breakStartMinutes, breakEndMinutes].some(Number.isNaN)) throw Object.assign(new Error('Confira os horários informados.'), { status: 400 });
-  if (openMinutes >= closeMinutes) throw Object.assign(new Error('O horário de abertura precisa ser antes do fechamento.'), { status: 400 });
-  if (breakEnabled && (breakStartMinutes <= openMinutes || breakEndMinutes >= closeMinutes || breakStartMinutes >= breakEndMinutes)) {
+  if (openMinutes === closeMinutes) throw Object.assign(new Error('Use horários diferentes para abertura e fechamento.'), { status: 400 });
+  if (breakEnabled && !validateBreakInsidePeriod({ openMinutes, closeMinutes, breakStartMinutes, breakEndMinutes })) {
     throw Object.assign(new Error('O almoço precisa ficar dentro do expediente.'), { status: 400 });
   }
   if (!Number.isFinite(slotInterval) || slotInterval < 5 || slotInterval > 120) throw Object.assign(new Error('O intervalo dos horários precisa ficar entre 5 e 120 minutos.'), { status: 400 });
@@ -101,8 +121,15 @@ async function updateBusinessHoursForShop(db, shopId, days) {
   const payload = days.map(day => validateDay(day, shopId));
   const seen = new Set(payload.map(day => day.weekday));
   if (seen.size !== payload.length) throw Object.assign(new Error('Existe dia repetido nos horários.'), { status: 400 });
-  const { error } = await db.from('business_hours').upsert(payload, { onConflict: 'barbershop_id,weekday' });
-  if (error) throw error;
+  for (const day of payload) {
+    const existing = await db.from('business_hours').select('id').eq('barbershop_id', shopId).eq('weekday', day.weekday).maybeSingle();
+    if (existing.error) throw existing.error;
+    const result = existing.data
+      ? await db.from('business_hours').update(day).eq('id', existing.data.id)
+      : await db.from('business_hours').insert(day);
+    if (result.error?.code === '23514') throw Object.assign(new Error('O banco ainda está com a regra antiga de horário. Rode a migração 007 no Supabase.'), { status: 400 });
+    if (result.error) throw result.error;
+  }
   return getBusinessHoursForShop(db, shopId);
 }
 
@@ -123,23 +150,36 @@ function getLocalParts(date) {
 async function assertWithinBusinessHours(db, { barbershopId, startsAt, durationMinutes }) {
   const days = await getBusinessHoursForShop(db, barbershopId);
   const local = getLocalParts(new Date(startsAt));
-  const day = days.find(item => item.weekday === local.weekday);
-  if (!day || day.closed) throw Object.assign(new Error('A barbearia está fechada neste dia.'), { status: 400 });
+  const duration = Math.round(Number(durationMinutes) || 30);
+  const candidates = [
+    { day: days.find(item => item.weekday === local.weekday), offset: 0 },
+    { day: days.find(item => item.weekday === previousWeekday(local.weekday)), offset: 24 * 60 }
+  ];
 
-  const startMinutes = local.minutes;
-  const endMinutes = startMinutes + Math.round(Number(durationMinutes) || 30);
-  const openMinutes = timeToMinutes(day.opensAt);
-  const closeMinutes = closingTimeToMinutes(day.closesAt);
-  if (startMinutes < openMinutes || endMinutes > closeMinutes) {
-    throw Object.assign(new Error('Este serviço não cabe dentro do horário de funcionamento.'), { status: 400 });
-  }
-  if (day.breakEnabled) {
-    const breakStart = timeToMinutes(day.breakStartsAt);
-    const breakEnd = timeToMinutes(day.breakEndsAt);
-    if (startMinutes < breakEnd && endMinutes > breakStart) {
-      throw Object.assign(new Error('Este horário atravessa o intervalo de almoço.'), { status: 400 });
+  for (const candidate of candidates) {
+    const day = candidate.day;
+    if (!day || day.closed) continue;
+    const openMinutes = timeToMinutes(day.opensAt);
+    const rawCloseMinutes = closingTimeToMinutes(day.closesAt);
+    const closeMinutes = normalizeCloseMinutes(openMinutes, rawCloseMinutes);
+    if (!candidate.offset && rawCloseMinutes <= openMinutes) {
+      const startMinutes = local.minutes;
+      const endMinutes = startMinutes + duration;
+      if (startMinutes < openMinutes || endMinutes > closeMinutes) continue;
     }
+    const startMinutes = local.minutes + candidate.offset;
+    const endMinutes = startMinutes + duration;
+    if (startMinutes < openMinutes || endMinutes > closeMinutes) continue;
+    if (day.breakEnabled) {
+      const breakStart = normalizePeriodMinute(timeToMinutes(day.breakStartsAt), openMinutes);
+      let breakEnd = normalizePeriodMinute(timeToMinutes(day.breakEndsAt), openMinutes);
+      if (breakEnd <= breakStart) breakEnd += 24 * 60;
+      if (startMinutes < breakEnd && endMinutes > breakStart) continue;
+    }
+    return;
   }
+
+  throw Object.assign(new Error('Este serviço não cabe dentro do horário de funcionamento.'), { status: 400 });
 }
 
 module.exports = { getBusinessHoursForShop, updateBusinessHoursForShop, assertWithinBusinessHours };

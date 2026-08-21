@@ -5,7 +5,7 @@
   <title>Agendar horário — NaRégua</title><link rel="icon" type="image/png" href="/assets/images/favicon-rounded.png?v=3">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/base.css"><link rel="stylesheet" href="/css/booking.css"><link rel="stylesheet" href="/css/booking-theme.css">
+  <link rel="stylesheet" href="/css/base.css"><link rel="stylesheet" href="/css/booking.css"><link rel="stylesheet" href="/css/booking-theme.css"><link rel="stylesheet" href="/css/booking-verification.css">
 </head>
 <body class="booking-body">
   <main class="booking-app">
@@ -39,7 +39,7 @@
         <details><summary><svg viewBox="0 0 24 24"><path d="M20 13 12 21 3 12V4h8z"/><circle cx="8" cy="8" r="1"/></svg><span>Tenho um cupom</span><b>⌄</b></summary><div class="coupon-entry"><input data-coupon-code maxlength="24" placeholder="Digite o código"><button type="button" data-apply-coupon>Aplicar</button></div><p data-coupon-message></p></details>
         <details><summary><svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/><path d="M8 10h8M12 7v6"/></svg><span>Adicionar uma observação</span><b>⌄</b></summary><textarea data-booking-notes maxlength="1000" placeholder="Ex.: Tenho sensibilidade na pele, gostaria de um corte específico..."></textarea></details>
       </div>
-      <form data-booking-form><label>Como podemos chamar você?<input name="name" required maxlength="100" placeholder="Seu nome"></label><label>WhatsApp com DDD<input name="phone" required maxlength="30" placeholder="(11) 99999-9999"></label><label class="payment-check" data-payment-check hidden><input type="checkbox" name="paidSignal"> Já fiz o Pix do sinal</label><p data-booking-error></p><button type="submit">Confirmar agendamento →</button></form>
+      <form data-booking-form><label>Como podemos chamar você?<input name="name" required maxlength="100" placeholder="Seu nome"></label><label>WhatsApp com DDD<input name="phone" required maxlength="30" placeholder="(11) 99999-9999"></label><label>Seu melhor e-mail<input name="email" type="email" required maxlength="254" autocomplete="email" placeholder="voce@exemplo.com"></label><section class="phone-verification" data-phone-verification hidden><div><strong>Confirme seu WhatsApp</strong><small data-verification-message>Enviamos um código de 6 números.</small></div><div class="verification-entry"><input data-verification-code inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000"><button type="button" data-confirm-verification>Verificar</button></div><button class="verification-resend" type="button" data-request-verification>Enviar outro código</button></section><label class="payment-check" data-payment-check hidden><input type="checkbox" name="paidSignal"> Já fiz o Pix do sinal</label><p data-booking-error></p><button type="submit">Confirmar agendamento →</button></form>
     </section>
 
     <section class="booking-success" data-booking-success hidden><span>✓</span><h2 data-success-title>Horário confirmado!</h2><p data-success-message>Seu atendimento já entrou na agenda da barbearia.</p><button type="button" data-book-again>Voltar ao início</button></section>

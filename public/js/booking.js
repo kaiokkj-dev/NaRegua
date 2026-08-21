@@ -19,9 +19,11 @@ let selectedDate = '';
 let selectedTime = '';
 let couponCode = '';
 let finalPriceCents = 0;
+let verificationToken = '';
+let verificationPhone = '';
 
 async function api(path, options = {}) {
-  const response = await fetch(path, { ...options, headers: { 'Content-Type': 'application/json', ...(options.headers || {}) } });
+  const response = await fetch(path, { cache: 'no-store', ...options, headers: { 'Content-Type': 'application/json', ...(options.headers || {}) } });
   const body = await response.json();
   if (!response.ok) throw new Error(body.error || 'Nao foi possivel concluir.');
   return body;
@@ -41,9 +43,24 @@ function closingTimeToMinutes(value) {
 }
 
 function minutesToTime(value) {
-  const hours = String(Math.floor(value / 60)).padStart(2, '0');
-  const minutes = String(value % 60).padStart(2, '0');
+  const normalized = ((value % (24 * 60)) + 24 * 60) % (24 * 60);
+  const hours = String(Math.floor(normalized / 60)).padStart(2, '0');
+  const minutes = String(normalized % 60).padStart(2, '0');
   return `${hours}:${minutes}`;
+}
+
+function normalizeCloseMinutes(openMinutes, closeMinutes) {
+  return closeMinutes <= openMinutes ? closeMinutes + 24 * 60 : closeMinutes;
+}
+
+function normalizePeriodMinute(minutes, openMinutes) {
+  return minutes < openMinutes ? minutes + 24 * 60 : minutes;
+}
+
+function slotDateTime(dateValue, minuteValue) {
+  const date = new Date(`${dateValue}T00:00:00`);
+  date.setMinutes(Number(minuteValue));
+  return date;
 }
 
 function dayFromDate(value) {
@@ -58,8 +75,10 @@ function selectedBusinessHours() {
 
 function slotOverlapsBreak(start, end, hours) {
   if (!hours.breakEnabled) return false;
-  const breakStart = timeToMinutes(hours.breakStartsAt);
-  const breakEnd = timeToMinutes(hours.breakEndsAt);
+  const open = timeToMinutes(hours.opensAt);
+  const breakStart = normalizePeriodMinute(timeToMinutes(hours.breakStartsAt), open);
+  let breakEnd = normalizePeriodMinute(timeToMinutes(hours.breakEndsAt), open);
+  if (breakEnd <= breakStart) breakEnd += 24 * 60;
   return start < breakEnd && end > breakStart;
 }
 
@@ -82,11 +101,14 @@ function formatPhone(value) {
 function validateFormFields() {
   const name = form.elements.name.value.trim().replace(/\s+/g, ' ');
   const phoneDigits = onlyDigits(form.elements.phone.value);
+  const email = form.elements.email.value.trim().toLowerCase();
   if (name.length < 2 || /\d/.test(name) || !/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(name)) return 'Digite seu nome sem números.';
   if (phoneDigits.length < 10 || phoneDigits.length > 11) return 'Digite um WhatsApp válido com DDD.';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Digite um e-mail válido.';
   if (catalog.shop.prepayment?.enabled && !form.elements.paidSignal.checked) return 'Confirme que você fez o Pix do sinal para continuar.';
   form.elements.name.value = name;
   form.elements.phone.value = formatPhone(phoneDigits);
+  form.elements.email.value = email;
   return '';
 }
 
@@ -128,22 +150,24 @@ function renderTimes() {
     return;
   }
   const open = timeToMinutes(hours.opensAt);
-  const close = closingTimeToMinutes(hours.closesAt);
+  const close = normalizeCloseMinutes(open, closingTimeToMinutes(hours.closesAt));
   const interval = Math.max(5, Number(hours.slotIntervalMinutes) || 30);
   const duration = Math.max(5, Number(service.duration_minutes) || 30);
   const now = new Date();
   const slots = [];
   for (let minute = open; minute + duration <= close; minute += interval) {
-    if (!slotOverlapsBreak(minute, minute + duration, hours)) slots.push(minutesToTime(minute));
+    if (!slotOverlapsBreak(minute, minute + duration, hours)) slots.push(minute);
   }
-  const breakStart = timeToMinutes(hours.breakStartsAt || '12:00');
+  const breakStart = normalizePeriodMinute(timeToMinutes(hours.breakStartsAt || '12:00'), open);
   const groups = [
-    ['Manha', slots.filter(time => timeToMinutes(time) < (hours.breakEnabled ? breakStart : 12 * 60))],
-    ['Tarde', slots.filter(time => timeToMinutes(time) >= (hours.breakEnabled ? breakStart : 12 * 60))]
+    ['Madrugada', slots.filter(minute => minute >= 24 * 60)],
+    ['Manha', slots.filter(minute => minute < 12 * 60)],
+    ['Tarde', slots.filter(minute => minute >= 12 * 60 && minute < 18 * 60)],
+    ['Noite', slots.filter(minute => minute >= 18 * 60 && minute < 24 * 60)]
   ];
   timesTarget.innerHTML = groups.map(([label, times]) => {
-    const valid = times.filter(time => new Date(`${selectedDate}T${time}:00`) > now);
-    return valid.length ? `<div class="time-group"><small>${label} (${valid.length})</small><div class="time-grid">${valid.map(time => `<button type="button" class="${selectedTime === time ? 'selected' : ''}" data-time="${time}">${time}</button>`).join('')}</div></div>` : '';
+    const valid = times.filter(minute => slotDateTime(selectedDate, minute) > now);
+    return valid.length ? `<div class="time-group"><small>${label} (${valid.length})</small><div class="time-grid">${valid.map(minute => `<button type="button" class="${Number(selectedTime) === minute ? 'selected' : ''}" data-time="${minute}">${minutesToTime(minute)}</button>`).join('')}</div></div>` : '';
   }).join('') || '<small>Nenhum horario disponivel para a duracao deste servico.</small>';
   updateContinue();
 }
@@ -230,7 +254,8 @@ document.querySelector('[data-continue]').addEventListener('click', () => {
   if (!selectedTime) return;
   finalPriceCents = service.price_cents;
   const professional = catalog.professionals.find(item => item.id === professionalId);
-  document.querySelector('[data-booking-review]').innerHTML = `<strong>${escapeHtml(service.name)}</strong><span>${selectedDate.split('-').reverse().join('/')} as ${selectedTime} · ${escapeHtml(professional?.name || 'Qualquer profissional')}</span><span>${service.duration_minutes} min · ${money.format(service.price_cents / 100)}</span>`;
+  const dateTime = slotDateTime(selectedDate, selectedTime);
+  document.querySelector('[data-booking-review]').innerHTML = `<strong>${escapeHtml(service.name)}</strong><span>${localDate(dateTime).split('-').reverse().join('/')} as ${minutesToTime(Number(selectedTime))} · ${escapeHtml(professional?.name || 'Qualquer profissional')}</span><span>${service.duration_minutes} min · ${money.format(service.price_cents / 100)}</span>`;
   renderPaymentBox();
   show(detailsScreen);
 });
@@ -247,6 +272,51 @@ form.elements.name.addEventListener('input', event => {
 
 form.elements.phone.addEventListener('input', event => {
   event.target.value = formatPhone(event.target.value);
+  if (onlyDigits(event.target.value) !== verificationPhone) {
+    verificationToken = '';
+    const panel = document.querySelector('[data-phone-verification]');
+    panel.hidden = true;
+    panel.classList.remove('is-verified');
+  }
+});
+
+async function requestPhoneVerification() {
+  const error = document.querySelector('[data-booking-error]');
+  const panel = document.querySelector('[data-phone-verification]');
+  const message = document.querySelector('[data-verification-message]');
+  const phone = onlyDigits(form.elements.phone.value);
+  if (phone.length < 10 || phone.length > 11) throw new Error('Digite um WhatsApp válido com DDD.');
+  error.textContent = '';
+  const result = await api(`/api/public/shops/${encodeURIComponent(slug)}/verification/request`, { method: 'POST', body: JSON.stringify({ phone }) });
+  verificationPhone = phone;
+  verificationToken = '';
+  panel.hidden = false;
+  panel.classList.remove('is-verified');
+  message.textContent = result.developmentCode ? `Modo local: use o código ${result.developmentCode}.` : 'Enviamos um código de 6 números para seu WhatsApp.';
+  document.querySelector('[data-verification-code]').focus();
+}
+
+document.querySelector('[data-request-verification]').addEventListener('click', async event => {
+  event.currentTarget.disabled = true;
+  try { await requestPhoneVerification(); } catch (error) { document.querySelector('[data-booking-error]').textContent = error.message; }
+  finally { event.currentTarget.disabled = false; }
+});
+
+document.querySelector('[data-confirm-verification]').addEventListener('click', async event => {
+  const button = event.currentTarget;
+  const code = document.querySelector('[data-verification-code]').value;
+  const error = document.querySelector('[data-booking-error]');
+  button.disabled = true;
+  button.textContent = 'Verificando...';
+  error.textContent = '';
+  try {
+    const result = await api(`/api/public/shops/${encodeURIComponent(slug)}/verification/confirm`, { method: 'POST', body: JSON.stringify({ phone: form.elements.phone.value, code }) });
+    verificationToken = result.verificationToken;
+    verificationPhone = onlyDigits(form.elements.phone.value);
+    document.querySelector('[data-phone-verification]').classList.add('is-verified');
+    document.querySelector('[data-verification-message]').textContent = 'WhatsApp confirmado. Agora você pode concluir o agendamento.';
+  } catch (failure) { error.textContent = failure.message; }
+  finally { button.disabled = false; button.textContent = 'Verificar'; }
 });
 
 document.querySelector('[data-apply-coupon]').addEventListener('click', async event => {
@@ -291,12 +361,19 @@ form.addEventListener('submit', async event => {
   error.textContent = '';
   const validation = validateFormFields();
   if (validation) return void (error.textContent = validation);
+  if (catalog.shop.phoneVerificationRequired && !verificationToken) {
+    button.disabled = true;
+    button.textContent = 'Enviando código...';
+    try { await requestPhoneVerification(); } catch (failure) { error.textContent = failure.message; }
+    finally { button.disabled = false; button.textContent = label; }
+    return;
+  }
   button.disabled = true;
   button.textContent = 'Confirmando...';
   try {
     const result = await api(`/api/public/shops/${encodeURIComponent(slug)}/bookings`, {
       method: 'POST',
-      body: JSON.stringify({ name: form.elements.name.value, phone: form.elements.phone.value, serviceId: service.id, professionalId, couponCode, notes: document.querySelector('[data-booking-notes]').value, startsAt: new Date(`${selectedDate}T${selectedTime}:00`).toISOString() })
+      body: JSON.stringify({ name: form.elements.name.value, phone: form.elements.phone.value, email: form.elements.email.value, verificationToken, serviceId: service.id, professionalId, couponCode, notes: document.querySelector('[data-booking-notes]').value, startsAt: slotDateTime(selectedDate, selectedTime).toISOString() })
     });
     if (result.status === 'pending') {
       document.querySelector('[data-success-title]').textContent = 'Reserva enviada!';
