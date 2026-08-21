@@ -105,12 +105,15 @@ async function createCheckout(userId, email, planCode) {
   const db = getSupabaseClient();
   const shopId = await getShopId(db, userId);
   const publicBackUrl = env.mercadoPagoBackUrl || (/^https:\/\//i.test(env.appUrl) ? env.appUrl : 'https://na-regua-liart.vercel.app');
+  // Assinaturas de teste exigem que vendedor e pagador sejam usuários de teste.
+  // Em produção, sem a variável abaixo, continua sendo usado o e-mail autenticado.
+  const payerEmail = env.mercadoPagoTestPayerEmail || email;
   const checkout = await mercadoPago('/preapproval', {
     method: 'POST',
     body: JSON.stringify({
       reason: `NaRégua — Plano ${plan.name}`,
       external_reference: `${shopId}:${plan.code}`,
-      payer_email: email,
+      payer_email: payerEmail,
       auto_recurring: { frequency: 1, frequency_type: 'months', transaction_amount: plan.priceCents / 100, currency_id: 'BRL' },
       back_url: `${publicBackUrl.replace(/\/$/, '')}/assinatura?checkout=return`,
       notification_url: `${publicBackUrl.replace(/\/$/, '')}/api/subscription/webhook`,

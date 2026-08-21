@@ -23,6 +23,7 @@ const env = {
   resendApiKey: process.env.RESEND_API_KEY || '',
   emailFrom: process.env.EMAIL_FROM || 'NaRégua <onboarding@resend.dev>',
   mercadoPagoAccessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN || '',
+  mercadoPagoTestPayerEmail: process.env.MERCADO_PAGO_TEST_PAYER_EMAIL || '',
   mercadoPagoBackUrl: process.env.MERCADO_PAGO_BACK_URL || '',
   mercadoPagoWebhookSecret: process.env.MERCADO_PAGO_WEBHOOK_SECRET || ''
 };
