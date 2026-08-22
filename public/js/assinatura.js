@@ -54,13 +54,15 @@ async function startCheckout(event) {
 }
 
 async function syncReturn() {
-  if (new URLSearchParams(location.search).get('checkout') !== 'return') return;
-  const preapprovalId = new URLSearchParams(location.search).get('preapproval_id');
-  if (!preapprovalId) return;
+  const params = new URLSearchParams(location.search);
+  if (params.get('checkout') !== 'success') return;
+  const sessionId = params.get('session_id');
+  if (!sessionId) return;
   try {
-    await api('/api/subscription/sync', { method: 'POST', body: JSON.stringify({ preapprovalId }) });
-    history.replaceState({}, '', '/assinatura?payment=updated');
-  } catch (_) { /* O resumo mostrará o estado atual sem liberar plano indevidamente. */ }
+    await api('/api/subscription/sync', { method: 'POST', body: JSON.stringify({ sessionId }) });
+    history.replaceState({}, '', '/assinatura?payment=success');
+    showToast('Assinatura confirmada. Seu plano já está ativo.', 'success');
+  } catch (_) { /* O webhook ainda poderá concluir a ativação com segurança. */ }
 }
 
 async function load() {

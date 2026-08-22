@@ -83,20 +83,28 @@ async function assertFeature(db, shopId, feature, message) {
   if (!plan.features[feature]) throw Object.assign(new Error(message || `Este recurso não está incluído no plano ${plan.name}.`), { status: 403, code: 'PLAN_FEATURE' });
 }
 
-async function mercadoPago(path, options = {}) {
-  if (!env.mercadoPagoAccessToken) throw Object.assign(new Error('Pagamento ainda não configurado.'), { status: 503 });
-  const response = await fetch(`https://api.mercadopago.com${path}`, {
+async function stripe(path, options = {}) {
+  if (!env.stripeSecretKey) throw Object.assign(new Error('Stripe ainda não configurado.'), { status: 503 });
+  const response = await fetch(`https://api.stripe.com/v1${path}`, {
     ...options,
-    headers: { Authorization: `Bearer ${env.mercadoPagoAccessToken}`, 'Content-Type': 'application/json', ...(options.headers || {}) },
-    signal: AbortSignal.timeout(12000)
+    headers: { Authorization: `Bearer ${env.stripeSecretKey}`, ...(options.headers || {}) },
+    signal: AbortSignal.timeout(15000)
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const detail = String(data.message || data.error || data.cause?.[0]?.description || '').trim().slice(0, 180);
-    console.error('Mercado Pago:', response.status, detail || 'falha sem detalhes');
-    throw Object.assign(new Error(detail ? `Mercado Pago: ${detail}` : 'Não foi possível iniciar o pagamento. Tente novamente.'), { status: 400, code: 'MERCADO_PAGO_CHECKOUT' });
+    const detail = String(data.error?.message || '').trim().slice(0, 220);
+    console.error('Stripe:', response.status, detail || 'falha sem detalhes');
+    throw Object.assign(new Error(detail ? `Stripe: ${detail}` : 'Não foi possível iniciar o pagamento. Tente novamente.'), { status: 400, code: 'STRIPE_CHECKOUT' });
   }
   return data;
+}
+
+function stripeForm(fields) {
+  const body = new URLSearchParams();
+  Object.entries(fields).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') body.set(key, String(value));
+  });
+  return body;
 }
 
 async function createCheckout(userId, email, planCode) {
@@ -104,76 +112,109 @@ async function createCheckout(userId, email, planCode) {
   if (!plan) throw Object.assign(new Error('Escolha um plano pago válido.'), { status: 400 });
   const db = getSupabaseClient();
   const shopId = await getShopId(db, userId);
-  const publicBackUrl = env.mercadoPagoBackUrl || (/^https:\/\//i.test(env.appUrl) ? env.appUrl : 'https://na-regua-liart.vercel.app');
-  // Assinaturas de teste exigem que vendedor e pagador sejam usuários de teste.
-  // Em produção, sem a variável abaixo, continua sendo usado o e-mail autenticado.
-  const payerEmail = env.mercadoPagoTestPayerEmail || email;
-  const checkout = await mercadoPago('/preapproval', {
+  const publicBackUrl = env.appUrl || 'http://localhost:3000';
+  const checkout = await stripe('/checkout/sessions', {
     method: 'POST',
-    body: JSON.stringify({
-      reason: `NaRégua — Plano ${plan.name}`,
-      external_reference: `${shopId}:${plan.code}`,
-      payer_email: payerEmail,
-      auto_recurring: { frequency: 1, frequency_type: 'months', transaction_amount: plan.priceCents / 100, currency_id: 'BRL' },
-      back_url: `${publicBackUrl.replace(/\/$/, '')}/assinatura?checkout=return`,
-      notification_url: `${publicBackUrl.replace(/\/$/, '')}/api/subscription/webhook`,
-      status: 'pending'
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: stripeForm({
+      mode: 'subscription',
+      customer_email: email,
+      client_reference_id: shopId,
+      success_url: `${publicBackUrl.replace(/\/$/, '')}/assinatura?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${publicBackUrl.replace(/\/$/, '')}/assinatura?checkout=cancelled`,
+      'line_items[0][quantity]': 1,
+      'line_items[0][price_data][currency]': 'brl',
+      'line_items[0][price_data][unit_amount]': plan.priceCents,
+      'line_items[0][price_data][recurring][interval]': 'month',
+      'line_items[0][price_data][product_data][name]': `NaRégua — Plano ${plan.name}`,
+      'metadata[barbershop_id]': shopId,
+      'metadata[plan_code]': plan.code,
+      'subscription_data[metadata][barbershop_id]': shopId,
+      'subscription_data[metadata][plan_code]': plan.code,
+      allow_promotion_codes: 'true'
     })
   });
-  if (!checkout.id || !checkout.init_point) throw Object.assign(new Error('O Mercado Pago não retornou o link de pagamento.'), { status: 502 });
-  const { data: saved, error } = await db.from('subscriptions').update({ provider: 'mercado_pago', provider_subscription_id: checkout.id, updated_at: new Date().toISOString() }).eq('barbershop_id', shopId).select('barbershop_id').maybeSingle();
+  if (!checkout.id || !checkout.url) throw Object.assign(new Error('O Stripe não retornou o link de pagamento.'), { status: 502 });
+  const { data: saved, error } = await db.from('subscriptions').update({ provider: 'stripe', updated_at: new Date().toISOString() }).eq('barbershop_id', shopId).select('barbershop_id').maybeSingle();
   if (error) throw Object.assign(new Error(`Assinatura criada, mas não foi possível vinculá-la: ${error.message}`), { status: 409, cause: error });
   if (!saved) {
-    const created = await db.from('subscriptions').insert({ barbershop_id: shopId, plan_code: 'essential', status: 'active', provider: 'mercado_pago', provider_subscription_id: checkout.id });
+    const created = await db.from('subscriptions').insert({ barbershop_id: shopId, plan_code: 'essential', status: 'active', provider: 'stripe' });
     if (created.error) throw Object.assign(new Error(`Assinatura criada, mas não foi possível vinculá-la: ${created.error.message}`), { status: 409, cause: created.error });
   }
-  return { checkoutUrl: checkout.init_point };
+  return { checkoutUrl: checkout.url };
 }
 
-async function syncCheckout(userId, preapprovalId) {
-  if (!preapprovalId) throw Object.assign(new Error('Assinatura não informada.'), { status: 400 });
+async function syncCheckout(userId, sessionId) {
+  if (!sessionId || !String(sessionId).startsWith('cs_')) throw Object.assign(new Error('Sessão de pagamento inválida.'), { status: 400 });
   const db = getSupabaseClient();
   const shopId = await getShopId(db, userId);
-  const remote = await mercadoPago(`/preapproval/${encodeURIComponent(preapprovalId)}`);
-  const [referenceShopId, planCode] = String(remote.external_reference || '').split(':');
+  const remote = await stripe(`/checkout/sessions/${encodeURIComponent(sessionId)}?expand[]=subscription`);
+  const referenceShopId = remote.metadata?.barbershop_id || remote.client_reference_id;
+  const planCode = remote.metadata?.plan_code;
   const plan = catalog.find(item => item.code === planCode && item.priceCents > 0);
   if (referenceShopId !== shopId || !plan) throw Object.assign(new Error('Esta assinatura não pertence à sua barbearia.'), { status: 403 });
-  await applyRemoteSubscription(db, remote, shopId, plan);
-  return { active: remote.status === 'authorized', status: remote.status, plan: remote.status === 'authorized' ? plan.code : null };
+  if (remote.payment_status !== 'paid' || !remote.subscription) return { active: false, status: remote.payment_status, plan: null };
+  await applyStripeSubscription(db, remote.subscription, shopId, plan);
+  return { active: true, status: remote.subscription.status, plan: plan.code };
 }
 
-async function applyRemoteSubscription(db, remote, shopId, plan) {
-  const updates = { provider: 'mercado_pago', provider_subscription_id: remote.id, updated_at: new Date().toISOString() };
-  if (remote.status === 'authorized') Object.assign(updates, { plan_code: plan.code, status: 'active', trial_ends_at: null, current_period_start: new Date().toISOString(), current_period_end: remote.next_payment_date || null });
-  if (remote.status === 'cancelled') Object.assign(updates, { plan_code: 'essential', status: 'cancelled', trial_ends_at: null, current_period_end: new Date().toISOString() });
-  if (remote.status === 'paused') Object.assign(updates, { plan_code: 'essential', status: 'past_due', trial_ends_at: null });
+function stripeDate(seconds) {
+  return seconds ? new Date(seconds * 1000).toISOString() : null;
+}
+
+async function applyStripeSubscription(db, remote, shopId, plan) {
+  const active = ['active', 'trialing'].includes(remote.status);
+  const cancelled = ['canceled', 'incomplete_expired'].includes(remote.status);
+  const periodStart = remote.current_period_start || remote.items?.data?.[0]?.current_period_start;
+  const periodEnd = remote.current_period_end || remote.items?.data?.[0]?.current_period_end;
+  const updates = {
+    provider: 'stripe',
+    provider_customer_id: typeof remote.customer === 'string' ? remote.customer : remote.customer?.id || null,
+    provider_subscription_id: remote.id,
+    plan_code: active ? plan.code : 'essential',
+    status: active ? (remote.status === 'trialing' ? 'trialing' : 'active') : cancelled ? 'cancelled' : 'past_due',
+    trial_ends_at: stripeDate(remote.trial_end),
+    current_period_start: stripeDate(periodStart),
+    current_period_end: stripeDate(periodEnd),
+    updated_at: new Date().toISOString()
+  };
   const { error } = await db.from('subscriptions').update(updates).eq('barbershop_id', shopId);
   if (error) throw error;
 }
 
-function verifyWebhookSignature({ signature, requestId, dataId }) {
-  if (!env.mercadoPagoWebhookSecret) return true;
-  const parts = Object.fromEntries(String(signature || '').split(',').map(item => item.split('=')));
-  if (!parts.ts || !parts.v1 || !requestId || !dataId) return false;
-  const manifest = `id:${String(dataId).toLowerCase()};request-id:${requestId};ts:${parts.ts};`;
-  const digest = crypto.createHmac('sha256', env.mercadoPagoWebhookSecret).update(manifest).digest('hex');
-  const received = Buffer.from(parts.v1, 'utf8');
-  const expected = Buffer.from(digest, 'utf8');
-  return received.length === expected.length && crypto.timingSafeEqual(received, expected);
+function verifyStripeSignature(payload, signature) {
+  if (!env.stripeWebhookSecret) throw Object.assign(new Error('Webhook do Stripe ainda não configurado.'), { status: 503 });
+  if (!payload || !signature) return false;
+  const parts = String(signature).split(',').reduce((result, part) => {
+    const [key, value] = part.split('=');
+    if (key && value) (result[key] ||= []).push(value);
+    return result;
+  }, {});
+  const timestamp = parts.t?.[0];
+  const signatures = parts.v1 || [];
+  if (!timestamp || !signatures.length || Math.abs(Date.now() / 1000 - Number(timestamp)) > 300) return false;
+  const digest = crypto.createHmac('sha256', env.stripeWebhookSecret).update(`${timestamp}.${payload.toString('utf8')}`).digest('hex');
+  const expected = Buffer.from(digest, 'hex');
+  return signatures.some(value => {
+    const received = Buffer.from(value, 'hex');
+    return received.length === expected.length && crypto.timingSafeEqual(received, expected);
+  });
 }
 
-async function handleWebhook({ type, dataId, signature, requestId }) {
-  if (!['subscription_preapproval', 'preapproval'].includes(String(type || '')) || !dataId) return { ignored: true };
-  if (!verifyWebhookSignature({ signature, requestId, dataId })) throw Object.assign(new Error('Assinatura do webhook inválida.'), { status: 401 });
-  const remote = await mercadoPago(`/preapproval/${encodeURIComponent(dataId)}`);
-  const [shopId, planCode] = String(remote.external_reference || '').split(':');
+async function handleWebhook({ payload, signature }) {
+  if (!verifyStripeSignature(payload, signature)) throw Object.assign(new Error('Assinatura do webhook inválida.'), { status: 401 });
+  const event = JSON.parse(payload.toString('utf8'));
+  if (!['customer.subscription.created', 'customer.subscription.updated', 'customer.subscription.deleted'].includes(event.type)) return { ignored: true };
+  const remote = event.data?.object;
+  const shopId = remote?.metadata?.barbershop_id;
+  const planCode = remote?.metadata?.plan_code;
   const plan = catalog.find(item => item.code === planCode && item.priceCents > 0);
   if (!shopId || !plan) return { ignored: true };
   const db = getSupabaseClient();
   const { data: shop, error } = await db.from('barbershops').select('id').eq('id', shopId).maybeSingle();
   if (error) throw error;
   if (!shop) return { ignored: true };
-  await applyRemoteSubscription(db, remote, shopId, plan);
+  await applyStripeSubscription(db, remote, shopId, plan);
   return { received: true };
 }
 

@@ -11,17 +11,15 @@ async function checkout(request, response, next) {
 }
 
 async function sync(request, response, next) {
-  try { return response.json(await subscriptions.syncCheckout(request.user.sub, request.body.preapprovalId)); }
+  try { return response.json(await subscriptions.syncCheckout(request.user.sub, request.body.sessionId)); }
   catch (error) { return next(error); }
 }
 
 async function webhook(request, response, next) {
   try {
     await subscriptions.handleWebhook({
-      type: request.query.type || request.body?.type,
-      dataId: request.query['data.id'] || request.body?.data?.id,
-      signature: request.get('x-signature'),
-      requestId: request.get('x-request-id')
+      payload: request.rawBody,
+      signature: request.get('stripe-signature')
     });
     return response.status(200).json({ received: true });
   } catch (error) { return next(error); }

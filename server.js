@@ -51,7 +51,12 @@ app.use((request, response, next) => {
     allowedHeaders: ['Content-Type', 'Authorization']
   })(request, response, next);
 });
-app.use(express.json({ limit: '32kb' }));
+app.use(express.json({
+  limit: '32kb',
+  verify(request, _response, buffer) {
+    if (request.originalUrl.startsWith('/api/subscription/webhook')) request.rawBody = Buffer.from(buffer);
+  }
+}));
 app.use(express.urlencoded({ extended: false, limit: '32kb' }));
 app.use(cookieParser());
 app.use(passport.initialize());
