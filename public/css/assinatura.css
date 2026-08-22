@@ -28,3 +28,5 @@
   .subscription-content .page-title h1{font-size:22px}
   .plan-card ul{grid-template-columns:1fr}
 }
+
+.subscription-current{display:flex;align-items:flex-start;flex-direction:column}.manage-billing{margin-top:14px;padding:0;border:0;background:transparent;color:var(--yellow);font:700 11px var(--font);cursor:pointer}.manage-billing:hover{text-decoration:underline}.manage-billing:disabled{color:#777;cursor:wait;text-decoration:none}

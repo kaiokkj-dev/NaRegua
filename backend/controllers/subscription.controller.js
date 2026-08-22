@@ -10,6 +10,11 @@ async function checkout(request, response, next) {
   catch (error) { return next(error); }
 }
 
+async function portal(request, response, next) {
+  try { return response.status(201).json(await subscriptions.createPortal(request.user.sub)); }
+  catch (error) { return next(error); }
+}
+
 async function sync(request, response, next) {
   try { return response.json(await subscriptions.syncCheckout(request.user.sub, request.body.sessionId)); }
   catch (error) { return next(error); }
@@ -25,4 +30,4 @@ async function webhook(request, response, next) {
   } catch (error) { return next(error); }
 }
 
-module.exports = { overview, checkout, sync, webhook };
+module.exports = { overview, checkout, portal, sync, webhook };

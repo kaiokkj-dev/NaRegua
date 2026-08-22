@@ -23,8 +23,24 @@ function renderSummary(data) {
   const { current, usage } = data;
   const trial = current.status === 'trialing';
   document.querySelector('[data-summary]').innerHTML = `
-    <div><small>SEU PLANO</small><h2>${current.name}${trial ? ' em teste' : ''}</h2><p>${trial ? `${trialDays(current.trialEndsAt)} dias restantes no período gratuito.` : 'Sua assinatura está ativa.'}</p></div>
+    <div class="subscription-current"><small>SEU PLANO</small><h2>${current.name}${trial ? ' em teste' : ''}</h2><p>${trial ? `${trialDays(current.trialEndsAt)} dias restantes no período gratuito.` : 'Sua assinatura está ativa.'}</p>${current.canManageBilling ? '<button class="manage-billing" data-manage-billing>Gerenciar assinatura →</button>' : ''}</div>
     <div class="usage-grid"><span><b>${usage.professionals}</b><small>de ${limitText(current.professionalLimit)} profissionais</small></span><span><b>${usage.appointmentsThisMonth}</b><small>de ${limitText(current.monthlyAppointmentLimit)} agendamentos no mês</small></span></div>`;
+  document.querySelector('[data-manage-billing]')?.addEventListener('click', openBillingPortal);
+}
+
+async function openBillingPortal(event) {
+  const button = event.currentTarget;
+  const original = button.textContent;
+  button.disabled = true;
+  button.textContent = 'Abrindo portal...';
+  try {
+    const data = await api('/api/subscription/portal', { method: 'POST' });
+    location.href = data.portalUrl;
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = original;
+    showToast(error.message, 'error');
+  }
 }
 
 function renderPlans(data) {

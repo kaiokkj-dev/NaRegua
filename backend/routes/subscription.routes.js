@@ -6,6 +6,7 @@ router.post('/webhook', controller.webhook);
 router.use(authenticate);
 router.get('/', controller.overview);
 router.post('/checkout', controller.checkout);
+router.post('/portal', controller.portal);
 router.post('/sync', controller.sync);
 
 module.exports = router;

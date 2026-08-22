@@ -50,7 +50,14 @@ async function getOverview(userId) {
   if (professionals.error) throw professionals.error;
   if (appointments.error) throw appointments.error;
   return {
-    current: { ...plan, status: subscription.status, trialEndsAt: subscription.trial_ends_at || null, periodEndsAt: subscription.current_period_end || null, setupRequired: Boolean(subscription.setupRequired) },
+    current: {
+      ...plan,
+      status: subscription.status,
+      trialEndsAt: subscription.trial_ends_at || null,
+      periodEndsAt: subscription.current_period_end || null,
+      setupRequired: Boolean(subscription.setupRequired),
+      canManageBilling: subscription.provider === 'stripe' && Boolean(subscription.provider_customer_id)
+    },
     usage: { professionals: professionals.count || 0, appointmentsThisMonth: appointments.count || 0 },
     plans: catalog
   };
@@ -144,6 +151,25 @@ async function createCheckout(userId, email, planCode) {
   return { checkoutUrl: checkout.url };
 }
 
+async function createPortal(userId) {
+  const db = getSupabaseClient();
+  const shopId = await getShopId(db, userId);
+  const subscription = await currentSubscription(db, shopId);
+  if (subscription.provider !== 'stripe' || !subscription.provider_customer_id) {
+    throw Object.assign(new Error('Esta barbearia ainda não possui uma assinatura do Stripe para gerenciar.'), { status: 409 });
+  }
+  const portal = await stripe('/billing_portal/sessions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: stripeForm({
+      customer: subscription.provider_customer_id,
+      return_url: `${env.appUrl.replace(/\/$/, '')}/assinatura`
+    })
+  });
+  if (!portal.url) throw Object.assign(new Error('O Stripe não retornou o acesso ao portal da assinatura.'), { status: 502 });
+  return { portalUrl: portal.url };
+}
+
 async function syncCheckout(userId, sessionId) {
   if (!sessionId || !String(sessionId).startsWith('cs_')) throw Object.assign(new Error('Sessão de pagamento inválida.'), { status: 400 });
   const db = getSupabaseClient();
@@ -218,4 +244,4 @@ async function handleWebhook({ payload, signature }) {
   return { received: true };
 }
 
-module.exports = { getOverview, assertProfessionalCapacity, assertAppointmentCapacity, assertFeature, createCheckout, syncCheckout, handleWebhook };
+module.exports = { getOverview, assertProfessionalCapacity, assertAppointmentCapacity, assertFeature, createCheckout, createPortal, syncCheckout, handleWebhook };
