@@ -149,6 +149,26 @@ function updateFloatingMenuState() {
 }
 
 function initDashboardChrome() {
+  const sidebarOpen = document.querySelector('[data-sidebar-open]');
+  if (sidebarOpen && !sidebarOpen.dataset.sidebarReady) {
+    sidebarOpen.dataset.sidebarReady = 'true';
+    sidebarOpen.addEventListener('click', () => document.body.classList.add('sidebar-open'));
+  }
+
+  document.querySelectorAll('[data-sidebar-close]').forEach(button => {
+    if (button.dataset.sidebarReady) return;
+    button.dataset.sidebarReady = 'true';
+    button.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
+  });
+
+  document.querySelectorAll('#dashboard-sidebar a').forEach(link => {
+    if (link.dataset.sidebarNavigationReady) return;
+    link.dataset.sidebarNavigationReady = 'true';
+    link.addEventListener('click', () => {
+      if (window.matchMedia('(max-width: 800px)').matches) document.body.classList.remove('sidebar-open');
+    });
+  });
+
   const shopTrigger = document.querySelector('[data-shop-menu-trigger]');
   const shopMenu = document.querySelector('[data-shop-menu]');
   if (shopTrigger && shopMenu && !shopTrigger.dataset.ready) {
